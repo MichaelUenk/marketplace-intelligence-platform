@@ -289,7 +289,7 @@ const createDemoSequences = (): OutreachSequence[] => [
         type: 'message',
         channel: 'phone_task',
         content: {
-          body: 'Call script:\n\nIntro: "Hi {{contact.first_name}}, this is [Your Name] from iBood. I recently sent an email about enhancing guest experience at {{company.name}}..."\n\nValue prop: "We help hotels eliminate single-use plastic bottles while improving guest satisfaction..."\n\nAsk: "Would you have 15 minutes this week to explore if this could work for your properties?"',
+          body: 'Call script:\n\nIntro: "Hi {{contact.first_name}}, this is [Your Name] from Alpine. I recently sent an email about CE compliance monitoring at {{company.name}}..."\n\nValue prop: "We help brands protect their market by identifying non-compliant competitors and streamlining compliance verification..."\n\nAsk: "Would you have 15 minutes this week to explore if this could work for your marketplace monitoring?"',
           tokens_used: ['contact.first_name', 'company.name'],
         },
       },

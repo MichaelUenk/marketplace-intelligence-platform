@@ -33,7 +33,7 @@ const mockContacts: Contact[] = [
     educational_background: 'MBA from Rotterdam School of Management',
     sales_approach_summary: 'Lead with sustainability angle. Reference her Philips experience.',
     key_talking_points: [
-      'Experience with iBood at Philips',
+      'Experience with Alpine at Philips',
       'Published article on workplace wellness',
       'Connected to 3 existing customers',
     ],

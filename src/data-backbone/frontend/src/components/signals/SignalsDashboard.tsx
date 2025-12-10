@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { EmptyState } from '../ui';
 
-// iBood Signal Types based on spec
+// Alpine Signal Types based on spec
 type SignalPriority = 'hot' | 'strategic' | 'market' | 'relationship';
 type SignalStatus = 'new' | 'viewed' | 'actioned' | 'dismissed' | 'expired';
 type CompanyStatus = 'new' | 'watching' | 'contacted' | 'active_supplier' | 'inactive';

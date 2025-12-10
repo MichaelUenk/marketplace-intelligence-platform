@@ -1,6 +1,7 @@
 {
   "navigation": {
     "dashboard": "Dashboard",
+    "compliance": "Compliance Check",
     "pipeline": "Pipeline",
     "leads": "Leads",
     "deals": "Deals",

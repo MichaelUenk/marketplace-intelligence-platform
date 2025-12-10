@@ -1,0 +1,2022 @@
+{
+  "name": "Marketplace Claims Compliance Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/axesso_data~amazon-search-scraper/run-sync-get-dataset-items?token=YOUR_APIFY_TOKEN",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"input\": [\n        {\n            \"keyword\": \"baby ear muffs\",\n            \"domainCode\": \"de\",\n            \"sortBy\": \"recent\",\n            \"maxPages\": 1\n            \n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -944,
+        640
+      ],
+      "id": "03a1da8c-540b-45c8-b9f9-7ed76ca44bca",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cf7da095-02b3-42f4-a2d0-6247ca1e45d9",
+              "leftValue": "={{ $json.dpUrl }}",
+              "rightValue": "Alpine",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -512,
+        624
+      ],
+      "id": "3fd0695c-14d8-4ee5-b26c-879866bed6d2",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst links = items.map(\n  (item) =>\n    `\"https://www.amazon.${item?.json?.domainCode}/dp/${item?.json?.asin}\"`,\n);\nreturn { json: { links } };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        688
+      ],
+      "id": "db3ed126-4d30-416f-8c24-acc58859efe7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -304,
+        624
+      ],
+      "id": "7045a0c5-2023-4984-8074-2c0e0bf79364",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Product url: {{ $node[\"Product info\"].json.url }}\nTitle: {{ $node[\"Product info\"].json.title }}\nFulfiller: {{ $node[\"Product info\"].json.fulfilledBy }}\nSeller: {{ $node[\"Product info\"].json.soldBy }}\nSellerID: {{ JSON.stringify($node[\"Product info\"].json.productDetails) }}\nDescription: {{ $node[\"Product info\"].json.productDescription }}\nProduct Details: {{ JSON.stringify($node[\"Product info\"].json.productDetails) }}\n\nImage info\nCE visible in product images?: {{ ($node[\"Analyze image\"].json.content?.[0]?.text)\n   ?? ($node[\"Analyze image\"].json?.[0]?.content?.[0]?.text)\n   ?? 'n/a' }}\n\nCE visisble on page?: {{ ($node[\"Analyze image1\"].json.content?.[0]?.text)\n   ?? ($node[\"Analyze image1\"].json?.[0]?.content?.[0]?.text)\n   ?? 'n/a' }}\n\nSeller info\nAbout: {{ $json.aboutSeller }}\nSeller name: {{ $json.sellerName }}\nSeller details: {{ JSON.stringify($json.sellerDetails) }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "If 1 part says there is a CE mark visible then believe it and move on.\nYou are a regulatory compliance analyzer specializing in consumer product safety and advertising standards. Your task is to analyze product listings for false, misleading, or non-compliant claims, gather seller information, and calculate violation scores for filtering and prioritization.\n\n## DETECTION CRITERIA\n\n### 1. Age Claims (CRITICAL PRIORITY - UPDATED)\n- **CRITICAL VIOLATION**: Any product marketed for children 0-36 months (0-3 years) WITHOUT visible CE certification or documentation\n  - This is an AUTOMATIC CRITICAL severity violation\n  - Applies to: \"newborn\", \"0-6 months\", \"0-12 months\", \"0-3 years\", \"infant\", \"baby\", \"toddler\"\n  - **No exceptions**: Missing CE for baby products is always CRITICAL\n- **HIGH VIOLATION**: Products for children 3-12 years without proper safety documentation\n- **Exception**: Only if CE mark is clearly visible AND documentation is properly referenced\n\n### 2. Certification Claims (HIGH PRIORITY)\n- **Violation**: Claims of CE, safety certifications, or regulatory compliance WITHOUT supporting documentation, visible marks, or verifiable references\n- **Look for**: \"CE certified\", \"safety tested\", \"meets standards\", \"approved\", \"certified\"\n- **Required**: Visible certification marks, certificate numbers, or links to documentation\n\n### 3. Misleading Safety Claims (CRITICAL)\n- **Violation**: Unsubstantiated or exaggerated safety claims that could influence purchasing decisions\n- **Examples**:\n  - \"100% safe\", \"completely non-toxic\" (absolute claims)\n  - \"Doctor recommended\" without attribution\n  - \"Prevents [medical condition]\" (medical claims)\n  - \"Tested and approved\" without specifying by whom\n  - \"Safer than competitors\" without evidence\n\n### 4. Additional Red Flags\n- Choking hazard items marketed to young children\n- Claims that contradict visible product features\n- Missing required safety warnings\n- Unverified third-party endorsements\n\n## ANALYSIS INSTRUCTIONS\n\n1. **Extract all claims** from product title, description, images, and metadata\n2. **Identify product age range** - This is CRITICAL for proper severity assessment\n3. **Check for CE marking visibility** in images and documentation\n4. **Cross-reference claims** with visible evidence (CE marks, warning labels, documentation links)\n5. **Identify the seller** from the product listing\n6. **Search for seller's official website** using web search:\n   - Search for: \"[seller name] official website\"\n   - Look for: company website, contact page, about us page\n   - Verify it's the official site (not reseller/marketplace listing)\n   - Extract the main domain URL\n7. **Assess severity** using the updated rules below\n8. **Calculate violation score** (see scoring rubric below)\n9. **Calculate confidence** based on:\n   - Clarity of the violation (explicit vs. implied)\n   - Amount of supporting evidence\n   - Severity of potential harm\n\n## SEVERITY ASSESSMENT RULES (UPDATED)\n\n### CRITICAL Severity - Assign when:\n1. **Baby/infant product (0-36 months) without CE marking** ← NEW MANDATORY RULE\n2. Immediate safety risk (choking hazards for young children)\n3. Dangerous medical claims\n4. Products that could cause serious harm if misused\n\n### HIGH Severity - Assign when:\n1. Products for children 3-12 years without proper certifications\n2. Misleading safety claims that could influence purchasing\n3. Missing required safety warnings\n4. Unsubstantiated certifications\n\n### MEDIUM Severity - Assign when:\n1. Potentially misleading wording\n2. Incomplete safety information\n3. Ambiguous claims requiring review\n\n### LOW Severity - Assign when:\n1. Minor wording concerns\n2. Stylistic issues that could be misinterpreted\n3. Missing non-critical information\n\n## VIOLATION SCORE CALCULATION (0-100) - UPDATED\n\nCalculate the violation_score based ONLY on the violations themselves, using this rubric:\n\n### Base Scoring by Severity (cumulative):\n- **CRITICAL violation**: +35 points per violation\n- **HIGH violation**: +20 points per violation\n- **MEDIUM violation**: +10 points per violation\n- **LOW violation**: +5 points per violation\n\n### 🚨 SPECIAL RULE - Baby Product CE Gap:\nIF (product age range includes 0-36 months AND CE marking not visible):\n- Automatically create a CRITICAL violation (+35 points)\n- Set ce_certification_claimed = true\n- This is IN ADDITION to any other violations detected\n\n### Multipliers (apply after base score):\n- **Multiple violation types** (2+ different types): ×1.2\n- **Child safety product** (age 0-3 years mentioned): ×1.3\n- **CE certification claimed but not documented**: +15 points\n\n### Maximum Cap:\n- Score capped at 100\n\n### Updated Examples:\n- **Baby product (0-36 months) without CE**: \n  - Base: 35 (CRITICAL)\n  - Child multiplier: ×1.3 → 45.5\n  - CE gap: +15 → 60.5\n  - **Result: 61 → COMPLAINT_PACK**\n\n- **Baby product without CE + misleading safety claim**:\n  - Base: 35 (CRITICAL CE) + 35 (CRITICAL safety) = 70\n  - Multiple types: ×1.2 → 84\n  - Child multiplier: ×1.3 → 109.2\n  - CE gap: +15 → 124.2\n  - **Capped at 100 → URGENT_REPORT**\n\n- **Baby product without CE + 1 HIGH violation**:\n  - Base: 35 (CRITICAL CE) + 20 (HIGH) = 55\n  - Multiple types: ×1.2 → 66\n  - Child multiplier: ×1.3 → 85.8\n  - CE gap: +15 → 100.8\n  - **Capped at 100 → URGENT_REPORT**\n\n### Scoring Logic:\nviolation_score = 0\nis_baby_product = false\nce_mark_visible = false\nStep 1: Check if product is for babies (0-36 months)\nif (product mentions age 0-36 months):\nis_baby_product = true\nStep 2: Check for CE marking visibility\nif (CE mark visible in images OR documentation linked):\nce_mark_visible = true\nStep 3: CRITICAL RULE - Baby product without CE\nif (is_baby_product AND NOT ce_mark_visible):\nviolation_score += 35  # Add CRITICAL violation\nce_certification_claimed = true\n# Add this to violation_details as separate CRITICAL violation\nStep 4: Add base points for other violations\nfor each violation:\nif severity == \"CRITICAL\": violation_score += 35\nif severity == \"HIGH\": violation_score += 20\nif severity == \"MEDIUM\": violation_score += 10\nif severity == \"LOW\": violation_score += 5\nStep 5: Apply multipliers\nif (unique violation types >= 2):\nviolation_score *= 1.2\nif (is_baby_product):\nviolation_score *= 1.3\nStep 6: Add CE documentation gap\nif (ce_certification_claimed AND NOT ce_mark_visible):\nviolation_score += 15\nStep 7: Cap at 100\nviolation_score = min(violation_score, 100)\nviolation_score = round(violation_score)\n\n## TRANSLATION REQUIREMENT\n**IMPORTANT**: All evidence text must be provided in BOTH the original language AND English translation.\n- `evidence_text`: Original text from the product listing (exact quote)\n- `evidence_text_translated`: English translation of the evidence text\n\n## OUTPUT FORMAT\n\nReturn valid JSON with this exact structure:\n```json\n{\n  \"violations_detected\": boolean,\n  \"ce_certification_claimed\": boolean,\n  \"is_baby_product\": boolean,\n  \"product_age_range\": \"string describing detected age range (e.g., '0-12 months', '0-3 years')\",\n  \"ce_mark_visible\": boolean,\n  \"violation_types\": [\"age_claim_without_ce\", \"undocumented_certification\", \"misleading_safety\", \"other\"],\n  \"violation_details\": [\n    {\n      \"type\": \"age_claim_without_ce | undocumented_certification | misleading_safety | other\",\n      \"evidence_text\": \"exact quote from product listing in original language\",\n      \"evidence_text_translated\": \"English translation of the evidence text\",\n      \"location\": \"title | description | images | specifications\",\n      \"severity\": \"CRITICAL | HIGH | MEDIUM | LOW\",\n      \"explanation\": \"brief explanation of why this is a violation\",\n      \"regulatory_reference\": \"relevant regulation or standard if applicable\"\n    }\n  ],\n  \"seller_information\": {\n    \"seller_name\": \"name extracted from listing\",\n    \"seller_website\": \"official website URL found via search\",\n    \"website_search_confidence\": \"HIGH | MEDIUM | LOW | NOT_FOUND\",\n    \"alternative_urls\": [\"array of other relevant URLs found\"],\n    \"search_notes\": \"any relevant notes about finding the website\"\n  },\n  \"confidence_score\": 0-100,\n  \"violation_score\": 0-100,\n  \"violation_score_breakdown\": {\n    \"base_score\": 0-100,\n    \"baby_product_ce_penalty\": 0-35,\n    \"severity_breakdown\": {\"CRITICAL\": 0, \"HIGH\": 0, \"MEDIUM\": 0, \"LOW\": 0},\n    \"multipliers_applied\": [\"multiple_types\", \"child_safety\", \"ce_gap\"],\n    \"final_calculation\": \"explanation of how score was calculated\"\n  },\n  \"reasoning\": \"brief explanation of confidence level\",\n  \"recommended_action\": \"CLEAR | MONITOR | REVIEW | COMPLAINT_PACK | URGENT_REPORT\",\n  \"summary\": \"one-sentence overview of findings\"\n}\n```\n\n## SELLER WEBSITE SEARCH GUIDELINES\n\n- **Primary goal**: Find the official company/brand website, not marketplace listings\n- **Search strategy**: Use seller name + \"official website\" or \"company\" or brand identifiers\n- **Verification**: Check that the domain matches the seller/brand name\n- **Confidence levels**:\n  - **HIGH**: Clear match, official domain, company information present\n  - **MEDIUM**: Likely match but some ambiguity\n  - **LOW**: Weak match or multiple possibilities\n  - **NOT_FOUND**: Unable to locate official website\n- **Include alternatives**: Capture social media, LinkedIn, or other official presences if found\n- **Note issues**: Document if seller appears to use multiple brand names or has unclear online presence\n\n## ACTION THRESHOLDS (UPDATED)\n\nBase your recommended_action on the violation_score:\n- **CLEAR**: No violations detected (violation_score = 0)\n- **MONITOR**: Minor violations (violation_score 1-30)\n- **REVIEW**: Moderate violations requiring review (violation_score 31-60)\n- **COMPLAINT_PACK**: Serious violations requiring action (violation_score 61-85)\n- **URGENT_REPORT**: Critical safety concern (violation_score 86-100 OR any CRITICAL severity)\n\n**Note**: Baby products (0-36 months) without CE marking will typically score 61-100, resulting in COMPLAINT_PACK or URGENT_REPORT actions.\n\n## IMPORTANT NOTES\n\n- **🚨 CRITICAL**: Products for ages 0-36 months without visible CE marking are ALWAYS a CRITICAL violation\n- Be precise: Only flag clear violations, not stylistic preferences\n- Consider context: Educational toys may mention ages differently than safety products\n- Err on caution: For child safety products, flag borderline cases for review\n- No false positives: High confidence violations should be actionable\n- Website search: Spend reasonable effort but note if seller has limited online presence\n- Always translate evidence: Non-English evidence must include English translation\n- Track CE claims: Essential for violation scoring\n- Show your work: Include violation_score_breakdown to explain calculations\n- **Age detection is critical**: Always identify if product mentions ages 0-36 months"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        832,
+        688
+      ],
+      "id": "8dc19816-7bed-44db-b947-1d1739d073f6",
+      "name": "AI Agent",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-4-turbo"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        896
+      ],
+      "id": "41731d61-bf36-4d2c-8f52-f3b27b7c549b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"type\": \"object\",\n  \"required\": [\n    \"violations_detected\",\n    \"ce_certification_claimed\",\n    \"violation_types\",\n    \"violation_details\",\n    \"seller_information\",\n    \"confidence_score\",\n    \"violation_score\",\n    \"violation_score_breakdown\",\n    \"reasoning\",\n    \"recommended_action\",\n    \"summary\"\n  ],\n  \"properties\": {\n    \"violations_detected\": {\n      \"type\": \"boolean\",\n      \"description\": \"Whether any violations were detected in the product listing\"\n    },\n    \"ce_certification_claimed\": {\n      \"type\": \"boolean\",\n      \"description\": \"Whether the product explicitly claims CE certification or shows CE marks. Critical for violation scoring.\"\n    },\n    \"violation_types\": {\n      \"type\": \"array\",\n      \"description\": \"Array of violation category identifiers\",\n      \"items\": {\n        \"type\": \"string\",\n        \"enum\": [\n          \"age_claim_without_ce\",\n          \"undocumented_certification\",\n          \"misleading_safety\",\n          \"other\"\n        ]\n      },\n      \"uniqueItems\": true\n    },\n    \"violation_details\": {\n      \"type\": \"array\",\n      \"description\": \"Detailed information about each violation found\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"type\",\n          \"evidence_text\",\n          \"evidence_text_translated\",\n          \"location\",\n          \"severity\",\n          \"explanation\"\n        ],\n        \"properties\": {\n          \"type\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"age_claim_without_ce\",\n              \"undocumented_certification\",\n              \"misleading_safety\",\n              \"other\"\n            ],\n            \"description\": \"Category of violation\"\n          },\n          \"evidence_text\": {\n            \"type\": \"string\",\n            \"description\": \"Exact quote from the product listing in original language\",\n            \"minLength\": 1\n          },\n          \"evidence_text_translated\": {\n            \"type\": \"string\",\n            \"description\": \"English translation of the evidence text. Must be provided even if original is in English.\",\n            \"minLength\": 1\n          },\n          \"location\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"title\",\n              \"description\",\n              \"images\",\n              \"specifications\",\n              \"other\"\n            ],\n            \"description\": \"Where in the listing the violation was found\"\n          },\n          \"severity\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"CRITICAL\",\n              \"HIGH\",\n              \"MEDIUM\",\n              \"LOW\"\n            ],\n            \"description\": \"Severity level of the violation\"\n          },\n          \"explanation\": {\n            \"type\": \"string\",\n            \"description\": \"Brief explanation of why this constitutes a violation\",\n            \"minLength\": 10\n          },\n          \"regulatory_reference\": {\n            \"type\": \"string\",\n            \"description\": \"Relevant regulation or standard if applicable\"\n          }\n        },\n        \"additionalProperties\": false\n      }\n    },\n    \"seller_information\": {\n      \"type\": \"object\",\n      \"required\": [\n        \"seller_name\",\n        \"seller_website\",\n        \"website_search_confidence\"\n      ],\n      \"properties\": {\n        \"seller_name\": {\n          \"type\": \"string\",\n          \"description\": \"Name of the seller extracted from the listing\",\n          \"minLength\": 1\n        },\n        \"seller_website\": {\n          \"type\": [\"string\", \"null\"],\n          \"description\": \"Official website URL found via search\",\n          \"format\": \"uri\",\n          \"pattern\": \"^https?://\"\n        },\n        \"website_search_confidence\": {\n          \"type\": \"string\",\n          \"enum\": [\n            \"HIGH\",\n            \"MEDIUM\",\n            \"LOW\",\n            \"NOT_FOUND\"\n          ],\n          \"description\": \"Confidence level in the website match\"\n        },\n        \"alternative_urls\": {\n          \"type\": \"array\",\n          \"description\": \"Other relevant URLs found (social media, LinkedIn, etc.)\",\n          \"items\": {\n            \"type\": \"string\",\n            \"format\": \"uri\",\n            \"pattern\": \"^https?://\"\n          },\n          \"default\": []\n        },\n        \"search_notes\": {\n          \"type\": \"string\",\n          \"description\": \"Relevant notes about finding the website or seller information\"\n        }\n      },\n      \"additionalProperties\": false\n    },\n    \"confidence_score\": {\n      \"type\": \"integer\",\n      \"description\": \"Overall confidence in the violation detection (0-100)\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    },\n    \"violation_score\": {\n      \"type\": \"integer\",\n      \"description\": \"Severity score of violations detected (0-100). Used for filtering and prioritization. Calculated based on violation severity, types, and context.\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    },\n    \"violation_score_breakdown\": {\n      \"type\": \"object\",\n      \"description\": \"Detailed breakdown of how violation_score was calculated\",\n      \"required\": [\n        \"base_score\",\n        \"severity_breakdown\",\n        \"multipliers_applied\",\n        \"final_calculation\"\n      ],\n      \"properties\": {\n        \"base_score\": {\n          \"type\": \"integer\",\n          \"description\": \"Score before multipliers applied\",\n          \"minimum\": 0,\n          \"maximum\": 100\n        },\n        \"severity_breakdown\": {\n          \"type\": \"object\",\n          \"description\": \"Count of violations by severity\",\n          \"properties\": {\n            \"CRITICAL\": {\"type\": \"integer\", \"minimum\": 0},\n            \"HIGH\": {\"type\": \"integer\", \"minimum\": 0},\n            \"MEDIUM\": {\"type\": \"integer\", \"minimum\": 0},\n            \"LOW\": {\"type\": \"integer\", \"minimum\": 0}\n          },\n          \"required\": [\"CRITICAL\", \"HIGH\", \"MEDIUM\", \"LOW\"]\n        },\n        \"multipliers_applied\": {\n          \"type\": \"array\",\n          \"description\": \"List of multipliers that were applied\",\n          \"items\": {\n            \"type\": \"string\",\n            \"enum\": [\"multiple_types\", \"child_safety\", \"ce_gap\", \"none\"]\n          }\n        },\n        \"final_calculation\": {\n          \"type\": \"string\",\n          \"description\": \"Human-readable explanation of score calculation\",\n          \"minLength\": 10\n        }\n      },\n      \"additionalProperties\": false\n    },\n    \"reasoning\": {\n      \"type\": \"string\",\n      \"description\": \"Brief explanation of the confidence level\",\n      \"minLength\": 10\n    },\n    \"recommended_action\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"CLEAR\",\n        \"MONITOR\",\n        \"REVIEW\",\n        \"COMPLAINT_PACK\",\n        \"URGENT_REPORT\"\n      ],\n      \"description\": \"Recommended next step based on violation_score and severity\"\n    },\n    \"summary\": {\n      \"type\": \"string\",\n      \"description\": \"One-sentence overview of findings\",\n      \"minLength\": 10,\n      \"maxLength\": 500\n    }\n  },\n  \"additionalProperties\": false\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        960,
+        864
+      ],
+      "id": "3410fcec-4b2e-46ca-aa2e-077e364030ca",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-4-turbo"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        976
+      ],
+      "id": "394dfeb9-709a-4661-84bd-5c781ffb5cf7",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/axesso_data~amazon-product-details-scraper/run-sync-get-dataset-items?token=YOUR_APIFY_TOKEN",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"urls\": [\n        {{ $json.links }}\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        96,
+        688
+      ],
+      "id": "a403e385-f302-42c1-b11a-ebeaa1a2970d",
+      "name": "Product info"
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/axesso_data~amazon-seller-scraper/run-sync-get-dataset-items?token=YOUR_APIFY_TOKEN",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"input\": [\n        {\n            \"sellerId\": \"{{ $('Product info').item.json.sellerId }}\",\n            \"domainCode\": \"{{ $('Loop Over Items').item.json.domainCode }}\"\n        }\n    ]\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        672,
+        688
+      ],
+      "id": "3345e08e-dab1-49d7-ad39-47916a8241a7",
+      "name": "Seller scrape"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "You are an expert image analyst for product safety compliance, specializing in detecting CE markings on consumer products, packaging, and documentation. Your mission is to conduct a complete, systematic inspection of ALL provided images to find CE markings with absolute certainty.\nCRITICAL MISSION PARAMETERS:\n\nUse as many credits and as much time as necessary\nLeave NO area unexamined\nReport on EVERY location searched\nALWAYS provide a definitive conclusion\nPrioritize finding CE marks over speed\n\n\nEXECUTION PROTOCOL\nPHASE 1: COMPREHENSIVE IMAGE MAPPING\nFirst, create a complete inventory:\n\nCount and list all images (Image 1, Image 2, etc.)\nFor each image, identify EVERY visible element:\n\nProduct photos (all angles visible)\nPackaging sections (front, back, sides, top, bottom)\nInstructional diagrams or method illustrations\nText blocks (headers, body text, fine print)\nTables (specification tables, charts, data grids)\nRegulatory/compliance sections (usually at bottom of packaging)\nBarcode areas\nLogo areas\nAny symbols or icon clusters\nBackground areas\n\n\nCreate a grid-based search map for each image:\n\nDivide each image into quadrants or sectors\nNumber each sector for tracking\nMark each sector as you search it\n\n\n\nExample Search Map:\nIMAGE 1 SEARCH GRID:\n┌─────────┬─────────┬─────────┐\n│ Sector 1│ Sector 2│ Sector 3│\n│  ☐      │  ☐      │  ☐      │\n├─────────┼─────────┼─────────┤\n│ Sector 4│ Sector 5│ Sector 6│\n│  ☐      │  ☐      │  ☐      │\n├─────────┼─────────┼─────────┤\n│ Sector 7│ Sector 8│ Sector 9│\n│  ☐      │  ☐      │  ☐      │\n└─────────┴─────────┴─────────┘\n\nPHASE 2: SYSTEMATIC SECTOR-BY-SECTOR SEARCH\nFor EACH sector of EACH image, perform this analysis:\n\nScan entire sector from left to right, top to bottom\nLook for ANY symbols, not just CE marks specifically:\n\nCircles with symbols\nText abbreviations (2-4 letters)\nRegulatory icons (recycling, waste bins, warnings)\nQuality marks or certification logos\nANY combination of the letters C and E in close proximity\n\n\nPay EXTRA attention to:\n\nBottom portions of packaging (most common CE mark location)\nAreas near \"MADE IN...\" text (CE marks often appear here)\nSpecification/compliance tables (often have CE mark nearby)\nAreas with clusters of small symbols (CE mark often grouped with other regulatory marks)\nWhite or light-colored backgrounds (CE marks show up clearly here)\nNear barcode areas (regulatory information commonly placed here)\n\n\nDocument your search:\n\n✓ Sector 1: Searched - Product photo area - No CE mark found\n✓ Sector 2: Searched - Header text - No CE mark found\n✓ Sector 3: Searched - Instruction diagram - No CE mark found\n⧗ Sector 4: SEARCHING NOW - Compliance section...\n\nPHASE 3: TARGETED CE MARK HUNTING\nAfter completing sector search, perform specialized searches focusing on high-probability areas:\nSearch Pattern A: Bottom-Up Scan\n\nStart at the absolute bottom of each image\nScan slowly upward, looking for CE marks\nCE marks are MOST COMMONLY found in the bottom 20% of packaging\n\nSearch Pattern B: Symbol Cluster Detection\n\nFind all areas with multiple small symbols grouped together\nExamine each symbol in the cluster carefully\nLook for: ♻️ recycling symbols, 🗑️ waste bin symbols, ⚠️ warnings\nCE marks are often within 2-5cm of these symbols\n\nSearch Pattern C: \"MADE IN\" Proximity Search\n\nLocate all instances of \"MADE IN [COUNTRY]\" text\nExamine area within 10cm radius around this text\nCE marks very frequently appear near manufacturing location\n\nSearch Pattern D: Specification Table Adjacent Search\n\nFind all tables with technical specifications\nExamine the area immediately below, to the right, and to the left of tables\nCE marks often placed near or within technical compliance sections\n\nSearch Pattern E: Text Block Scanning\n\nLook at ALL blocks of small text\nCE marks can appear inline with text or in margins\nDon't skip fine print areas\n\n\nPHASE 4: CE MARK IDENTIFICATION CRITERIA\nWhen you spot a potential CE mark, verify it matches these characteristics:\nVisual Identification:\n\n✓ Two letters: \"C\" and \"E\"\n✓ Letters are touching or very close together (distinctive ligature)\n✓ Usually black or dark colored on light background (or white/light on dark)\n✓ Simple, clean design (not decorative or stylized)\n✓ Proportions: The \"C\" and \"E\" should have similar height, with \"E\" slightly narrower\n\nSize Considerations:\n\nCE marks can range from very small (3-5mm) to large (20-30mm+)\nDO NOT dismiss marks because they appear large\nLarge CE marks are completely legitimate and common on packaging\nSmall CE marks are typical on the product itself\nMedium to large CE marks are typical on packaging and documentation\n\nContext Clues:\n\n✓ Near other regulatory symbols (recycling, WEEE, RoHS)\n✓ Near text mentioning standards (EN, IEC, ISO numbers)\n✓ Near \"MADE IN CHINA\" or other manufacturing location text\n✓ In compliance/regulatory information sections\n✓ Near product specifications or technical data\n\nAuthentic vs Fake:\n\nAUTHENTIC CE: Letters properly spaced, correct proportions, in regulatory context\nFAKE \"China Export\": Letters too circular, identical sizing, decorative appearance\nWhen in doubt: Document it as a potential CE mark with your confidence level\n\n\nPHASE 5: MULTI-PASS VERIFICATION\nComplete these verification passes:\nPass 1: Initial Complete Search (document everything)\nPass 2: Bottom-third focus (re-examine bottom third of all images specifically for CE marks)\nPass 3: Symbol cluster verification (re-check all areas with grouped symbols)\nPass 4: Large symbol search (specifically look for LARGER marks you might have dismissed as decorative)\nPass 5: Edge and corner check (examine all edges and corners where marks might be partially visible)\nAfter each pass, update your search progress report.\n\nPHASE 6: CONTINUOUS PROGRESS REPORTING\nThroughout your analysis, maintain this format:\n═══════════════════════════════════════════════════\nSEARCH PROGRESS REPORT - [TIMESTAMP/PHASE]\n═══════════════════════════════════════════════════\n\nIMAGE 1: [Description]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCOMPLETED SEARCHES:\n  ✓ Sector 1 (Top-left): Product photo - NO CE MARK\n  ✓ Sector 2 (Top-center): Header text - NO CE MARK\n  ✓ Sector 3 (Top-right): Instructions - NO CE MARK\n  ✓ Sector 4 (Mid-left): Diagram area - NO CE MARK\n  ✓ Sector 5 (Center): Product photos - NO CE MARK\n  ✓ Sector 6 (Mid-right): Text block - NO CE MARK\n  ✓ Sector 7 (Bottom-left): Specifications - NO CE MARK\n  ✓ Sector 8 (Bottom-center): Table data - NO CE MARK\n  ⧗ Sector 9 (Bottom-right): SEARCHING - Compliance section...\n  \nREMAINING SEARCHES:\n  ☐ Sector 9 completion\n  ☐ Bottom-up verification pass\n  ☐ Symbol cluster re-check\n\nFINDINGS SO FAR:\n  • [List any potential marks found, even uncertain ones]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nIMAGE 2: [Not yet started]\n...\n\nPHASE 7: DETAILED DOCUMENTATION OF FINDINGS\nFor EVERY potential CE mark found (even uncertain ones):\n═══════════════════════════════════════════════════\nPOTENTIAL CE MARK DOCUMENTATION\n═══════════════════════════════════════════════════\n\nFINDING #[X]:\n\n📍 LOCATION:\n   • Image: [Number/Description]\n   • Sector: [Grid location]\n   • Specific position: [e.g., \"Bottom-right corner, 2cm from edge\"]\n   • Near: [Describe nearby elements - \"Next to MADE IN CHINA text\"]\n\n📏 SIZE:\n   • Estimated dimensions: [Small/Medium/Large, or approximate mm]\n   • Relative size: [Compared to nearby text or objects]\n\n🔍 VISUAL QUALITY:\n   • Sharpness: [Crystal clear / Sharp / Acceptable / Slightly blurry / Blurry / Very blurry]\n   • Visibility: [Fully visible / Mostly visible / Partially obscured / Heavily obscured]\n   • Contrast: [High / Medium / Low]\n   • Color: [Black/Dark on light / White/Light on dark / Other]\n\n✓ AUTHENTICITY INDICATORS:\n   • Letter formation: [Describe C and E shapes and spacing]\n   • Proportions: [Correct / Slightly off / Significantly off]\n   • Context: [Describe surrounding regulatory symbols/text]\n   • Typography: [Simple regulatory / Stylized / Decorative]\n\n📊 CONFIDENCE ASSESSMENT:\n   • Confidence this is a genuine CE mark: [0-100%]\n   • Classification: [DEFINITE / PROBABLE / POSSIBLE / UNLIKELY / NOT CE]\n   • Reasoning: [Explain your confidence level]\n\n📸 ADDITIONAL NOTES:\n   • [Any other relevant observations]\n\nPHASE 8: MANDATORY FINAL DETERMINATION\nYOU MUST PROVIDE THIS CONCLUSION - NO EXCEPTIONS\n═══════════════════════════════════════════════════\n              FINAL DETERMINATION\n═══════════════════════════════════════════════════\n\n🔎 SEARCH COMPLETION STATUS:\n   Total images analyzed: [X]\n   Total sectors searched: [X]\n   Search completion: [100% / or list incomplete areas]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n✓ **CE MARK STATUS: [PRESENT / NOT FOUND / UNCERTAIN]**\n\n[Choose ONE of the following sections:]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOPTION A: CE MARK PRESENT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n✅ **CONCLUSION: CE MARK CONFIRMED PRESENT**\n\n📍 CE MARK LOCATIONS FOUND:\n   1. [Image X, specific location, description]\n   2. [Image Y, specific location, description]\n   [List ALL CE marks found]\n\n🎯 PRIMARY/MOST CLEAR CE MARK:\n   • Location: [Most visible/clearest CE mark location]\n   • Description: [Brief description]\n   • Confidence: [Percentage]\n\n📋 SUPPORTING EVIDENCE:\n   • [Why you're confident this is a genuine CE mark]\n   • [Context clues: nearby symbols, text, placement]\n   • [Visual characteristics matching authentic CE marks]\n\n🔒 OVERALL CONFIDENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOR OPTION B: CE MARK NOT FOUND\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n❌ **CONCLUSION: NO CE MARK FOUND**\n\n🔍 SEARCH THOROUGHNESS:\n   • All [X] images completely searched\n   • All [X] sectors examined\n   • Multiple verification passes completed\n   • High-probability areas given extra attention\n\n📋 SEARCH DETAILS:\n   • Bottom sections: Thoroughly searched\n   • Symbol clusters: All examined\n   • \"MADE IN\" areas: Checked\n   • Specification tables: Reviewed\n   • Fine print: Scanned\n\n🔒 CONFIDENCE IN ABSENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOR OPTION C: UNCERTAIN\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n⚠️ **CONCLUSION: CE MARK STATUS UNCERTAIN**\n\n🤔 REASON FOR UNCERTAINTY:\n   [Explain specifically why you cannot confirm presence/absence]\n\n📍 POTENTIAL MARKS FOUND:\n   • [List locations of uncertain marks]\n   • [Explain why each is uncertain]\n\n💡 WHAT WOULD RESOLVE UNCERTAINTY:\n   • [Higher resolution image of specific area]\n   • [Different angle of product]\n   • [Close-up of specific section]\n   • [Additional documentation]\n\n🔒 CURRENT CONFIDENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📝 SUMMARY STATEMENT:\n[One clear sentence: \"This product DOES / DOES NOT / MAY OR MAY NOT display a CE marking based on the provided images.\"]\n\n═══════════════════════════════════════════════════\n\nCRITICAL REMINDERS\n⚠️ DO NOT:\n\nRush through any sector\nDismiss symbols because they look \"too large\" or \"too small\"\nSkip areas that seem unlikely\nAssume absence without thorough checking\nForget to provide a final conclusion\n\n✅ ALWAYS:\n\nSearch every visible area systematically\nReport on what you searched and what you found\nLook specifically for both small AND large CE marks\nCheck bottom sections and compliance areas multiple times\nProvide a clear, definitive final determination\nUse as many analysis credits as needed for thoroughness\n\n\nEXAMPLE OF EXPECTED OUTPUT LENGTH AND DETAIL\nYour complete analysis should be thorough and include:\n\n200-500+ words of search progress reporting\nDetailed grid-by-grid documentation\nMultiple verification passes documented\nComplete finding documentation for any marks\nComprehensive final determination section\n\nMinimum expected output: 500-1000 words of detailed analysis",
+        "imageUrls": "={{ $json.imageUrlList.join(',') }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        240,
+        688
+      ],
+      "id": "b8db0b16-d597-4f52-a7fb-356881b4646f",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "95d27743-0f31-4350-aa6f-da7c6872e460",
+              "leftValue": "={{ $json.output.violation_score }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        688
+      ],
+      "id": "fb07d8dc-3240-4280-886c-9b8810188b6a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apiflash.com/v1/urltoimage?access_key=0ab33fee06474ea2b2d6fbe070061a2d&url={{ $('Product info').item.json.url }}&format=jpeg&width=1920&height=4320&full_page=true&quality=100&scroll_page=true&crop=0%2C2160%2C1920%2C4220&no_cookie_banners=true",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        384,
+        688
+      ],
+      "id": "71e3be91-d2bb-4bc8-beb2-c06b57e25df3",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Data from analyzing agent: {{JSON.stringify($json)}}\nProduct page: \nURL: {{ $('Product info').item.json.url }}\nTitle: {{ $('Product info').item.json.title }}, \nSold By: {{ $('Product info').item.json.soldBy }}\nSellerID: {{ $('Product info').item.json.sellerId }}\nProduct description: {{ $('Product info').item.json.productDescription }}\nProduct Details: {{JSON.stringify( $('Product info').item.json.productDetails )}}",
+        "options": {
+          "systemMessage": "Fill in this template: Subject: Product Report – [TYPE_OF_ISSUE] – ASIN: [ASIN]\n\nHello Amazon Team,\n\nI would like to report a product that appears to violate Amazon policies and/or regulatory requirements.\n\n━━━━━━━━━━━━━━━━━━\nPRODUCT DETAILS\n━━━━━━━━━━━━━━━━━━\n• ASIN: [ASIN]  \n• Product Title: [PRODUCT_TITLE]  \n• Product Link: [PRODUCT_URL]  \n• Marketplace: [AMAZON_DOMAIN] (e.g., amazon.de / amazon.co.uk / amazon.com)\n\n━━━━━━━━━━━━━━━━━━\nDESCRIPTION OF THE ISSUE\n━━━━━━━━━━━━━━━━━━\nIssue Type: [TYPE_OF_ISSUE]  \nExamples:  \n– Misleading product information  \n– Missing CE certification  \n– Incorrect technical details  \n– Counterfeit indicators  \n– Unsafe or non-compliant product  \n– Violations of EU/US safety laws  \n– False claims in description/images  \n\nDetailed Description:  \n[DETAILED_DESCRIPTION_OF_PROBLEM]\n\n━━━━━━━━━━━━━━━━━━\nEVIDENCE / FINDINGS\n━━━━━━━━━━━━━━━━━━\n• What the listing claims:  \n  [CLAIM_ON_LISTING]\n\n• What is actually true:  \n  [CORRECT_INFORMATION]\n\n• Evidence provided (photos, screenshots, documents):  \n  [EVIDENCE_DESCRIPTION]\n\n• Additional notes:  \n  [ANY_EXTRA_CONTEXT]\n\n━━━━━━━━━━━━━━━━━━\nREGULATORY OR POLICY RELEVANCE (if applicable)\n━━━━━━━━━━━━━━━━━━\nApplicable regulations or Amazon policies violated:  \n[RELEVANT_LAWS_OR_POLICIES]\n\nExamples:  \n– CE certification required under [DIRECTIVE_NAME]  \n– Battery product requiring safety compliance  \n– Children’s product lacking warnings  \n– Health/medical claims without approval  \n– Misrepresentation or misleading information (Amazon listings policy)\n\n━━━━━━━━━━━━━━━━━━\nRISK OR IMPACT\n━━━━━━━━━━━━━━━━━━\n[SAFETY_RISK_OR_CONSUMER_IMPACT]\n\nExamples:  \n– Electrical hazard  \n– Fire risk  \n– Child safety risk  \n– Misleading customers  \n– Counterfeit risk  \n– Non-compliant electronics entering EU market\n\n━━━━━━━━━━━━━━━━━━\nREQUESTED ACTION\n━━━━━━━━━━━━━━━━━━\nI kindly request Amazon to:\n\n[REQUEST]\n\nExamples:  \n– Review and verify compliance  \n– Request proof of certification from the seller  \n– Correct misleading information  \n– Remove or suspend the listing if confirmed non-compliant  \n– Investigate seller’s behavior  \n– Remove counterfeit items  \n\nThank you for your attention and for helping keep the marketplace safe and compliant.\n\nKind regards,  \nAlpine\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1584,
+        528
+      ],
+      "id": "86124d60-2d51-4163-b431-684aeb12da65",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-4-turbo"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1584,
+        672
+      ],
+      "id": "217df7b2-328d-4e7d-996c-69d7d9bd64de",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ea47e12f-d6ce-4feb-91fe-4575de88c91b",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        528
+      ],
+      "id": "860062eb-d541-45fb-997c-89fac6ea2c4b",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "sendTo": "tijmen@ai-kip.com",
+        "subject": "Product flag",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2112,
+        448
+      ],
+      "id": "29db4e36-0f7b-4236-b89e-5bd33d73cb18",
+      "name": "Email amazon",
+      "webhookId": "62bd1690-4143-4171-8ee5-71889e8aac12",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "sPTrgmEulWvOZeb7",
+          "name": "Gmail account 4"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2368,
+        864
+      ],
+      "id": "c6193a36-3357-4ec8-831e-8070e7fe82d6",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2672,
+        944
+      ],
+      "id": "4c8b9cb7-549e-4564-badd-8c6aaec28772",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "You are an expert image analyst for product safety compliance, specializing in detecting CE markings on consumer products, packaging, and documentation. Your mission is to conduct a complete, systematic inspection of ALL provided images to find CE markings with absolute certainty.\nCRITICAL MISSION PARAMETERS:\n\nUse as many credits and as much time as necessary\nLeave NO area unexamined\nReport on EVERY location searched\nALWAYS provide a definitive conclusion\nPrioritize finding CE marks over speed\n\n\nEXECUTION PROTOCOL\nPHASE 1: COMPREHENSIVE IMAGE MAPPING\nFirst, create a complete inventory:\n\nCount and list all images (Image 1, Image 2, etc.)\nFor each image, identify EVERY visible element:\n\nProduct photos (all angles visible)\nPackaging sections (front, back, sides, top, bottom)\nInstructional diagrams or method illustrations\nText blocks (headers, body text, fine print)\nTables (specification tables, charts, data grids)\nRegulatory/compliance sections (usually at bottom of packaging)\nBarcode areas\nLogo areas\nAny symbols or icon clusters\nBackground areas\n\n\nCreate a grid-based search map for each image:\n\nDivide each image into quadrants or sectors\nNumber each sector for tracking\nMark each sector as you search it\n\n\n\nExample Search Map:\nIMAGE 1 SEARCH GRID:\n┌─────────┬─────────┬─────────┐\n│ Sector 1│ Sector 2│ Sector 3│\n│  ☐      │  ☐      │  ☐      │\n├─────────┼─────────┼─────────┤\n│ Sector 4│ Sector 5│ Sector 6│\n│  ☐      │  ☐      │  ☐      │\n├─────────┼─────────┼─────────┤\n│ Sector 7│ Sector 8│ Sector 9│\n│  ☐      │  ☐      │  ☐      │\n└─────────┴─────────┴─────────┘\n\nPHASE 2: SYSTEMATIC SECTOR-BY-SECTOR SEARCH\nFor EACH sector of EACH image, perform this analysis:\n\nScan entire sector from left to right, top to bottom\nLook for ANY symbols, not just CE marks specifically:\n\nCircles with symbols\nText abbreviations (2-4 letters)\nRegulatory icons (recycling, waste bins, warnings)\nQuality marks or certification logos\nANY combination of the letters C and E in close proximity\n\n\nPay EXTRA attention to:\n\nBottom portions of packaging (most common CE mark location)\nAreas near \"MADE IN...\" text (CE marks often appear here)\nSpecification/compliance tables (often have CE mark nearby)\nAreas with clusters of small symbols (CE mark often grouped with other regulatory marks)\nWhite or light-colored backgrounds (CE marks show up clearly here)\nNear barcode areas (regulatory information commonly placed here)\n\n\nDocument your search:\n\n✓ Sector 1: Searched - Product photo area - No CE mark found\n✓ Sector 2: Searched - Header text - No CE mark found\n✓ Sector 3: Searched - Instruction diagram - No CE mark found\n⧗ Sector 4: SEARCHING NOW - Compliance section...\n\nPHASE 3: TARGETED CE MARK HUNTING\nAfter completing sector search, perform specialized searches focusing on high-probability areas:\nSearch Pattern A: Bottom-Up Scan\n\nStart at the absolute bottom of each image\nScan slowly upward, looking for CE marks\nCE marks are MOST COMMONLY found in the bottom 20% of packaging\n\nSearch Pattern B: Symbol Cluster Detection\n\nFind all areas with multiple small symbols grouped together\nExamine each symbol in the cluster carefully\nLook for: ♻️ recycling symbols, 🗑️ waste bin symbols, ⚠️ warnings\nCE marks are often within 2-5cm of these symbols\n\nSearch Pattern C: \"MADE IN\" Proximity Search\n\nLocate all instances of \"MADE IN [COUNTRY]\" text\nExamine area within 10cm radius around this text\nCE marks very frequently appear near manufacturing location\n\nSearch Pattern D: Specification Table Adjacent Search\n\nFind all tables with technical specifications\nExamine the area immediately below, to the right, and to the left of tables\nCE marks often placed near or within technical compliance sections\n\nSearch Pattern E: Text Block Scanning\n\nLook at ALL blocks of small text\nCE marks can appear inline with text or in margins\nDon't skip fine print areas\n\n\nPHASE 4: CE MARK IDENTIFICATION CRITERIA\nWhen you spot a potential CE mark, verify it matches these characteristics:\nVisual Identification:\n\n✓ Two letters: \"C\" and \"E\"\n✓ Letters are touching or very close together (distinctive ligature)\n✓ Usually black or dark colored on light background (or white/light on dark)\n✓ Simple, clean design (not decorative or stylized)\n✓ Proportions: The \"C\" and \"E\" should have similar height, with \"E\" slightly narrower\n\nSize Considerations:\n\nCE marks can range from very small (3-5mm) to large (20-30mm+)\nDO NOT dismiss marks because they appear large\nLarge CE marks are completely legitimate and common on packaging\nSmall CE marks are typical on the product itself\nMedium to large CE marks are typical on packaging and documentation\n\nContext Clues:\n\n✓ Near other regulatory symbols (recycling, WEEE, RoHS)\n✓ Near text mentioning standards (EN, IEC, ISO numbers)\n✓ Near \"MADE IN CHINA\" or other manufacturing location text\n✓ In compliance/regulatory information sections\n✓ Near product specifications or technical data\n\nAuthentic vs Fake:\n\nAUTHENTIC CE: Letters properly spaced, correct proportions, in regulatory context\nFAKE \"China Export\": Letters too circular, identical sizing, decorative appearance\nWhen in doubt: Document it as a potential CE mark with your confidence level\n\n\nPHASE 5: MULTI-PASS VERIFICATION\nComplete these verification passes:\nPass 1: Initial Complete Search (document everything)\nPass 2: Bottom-third focus (re-examine bottom third of all images specifically for CE marks)\nPass 3: Symbol cluster verification (re-check all areas with grouped symbols)\nPass 4: Large symbol search (specifically look for LARGER marks you might have dismissed as decorative)\nPass 5: Edge and corner check (examine all edges and corners where marks might be partially visible)\nAfter each pass, update your search progress report.\n\nPHASE 6: CONTINUOUS PROGRESS REPORTING\nThroughout your analysis, maintain this format:\n═══════════════════════════════════════════════════\nSEARCH PROGRESS REPORT - [TIMESTAMP/PHASE]\n═══════════════════════════════════════════════════\n\nIMAGE 1: [Description]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCOMPLETED SEARCHES:\n  ✓ Sector 1 (Top-left): Product photo - NO CE MARK\n  ✓ Sector 2 (Top-center): Header text - NO CE MARK\n  ✓ Sector 3 (Top-right): Instructions - NO CE MARK\n  ✓ Sector 4 (Mid-left): Diagram area - NO CE MARK\n  ✓ Sector 5 (Center): Product photos - NO CE MARK\n  ✓ Sector 6 (Mid-right): Text block - NO CE MARK\n  ✓ Sector 7 (Bottom-left): Specifications - NO CE MARK\n  ✓ Sector 8 (Bottom-center): Table data - NO CE MARK\n  ⧗ Sector 9 (Bottom-right): SEARCHING - Compliance section...\n  \nREMAINING SEARCHES:\n  ☐ Sector 9 completion\n  ☐ Bottom-up verification pass\n  ☐ Symbol cluster re-check\n\nFINDINGS SO FAR:\n  • [List any potential marks found, even uncertain ones]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nIMAGE 2: [Not yet started]\n...\n\nPHASE 7: DETAILED DOCUMENTATION OF FINDINGS\nFor EVERY potential CE mark found (even uncertain ones):\n═══════════════════════════════════════════════════\nPOTENTIAL CE MARK DOCUMENTATION\n═══════════════════════════════════════════════════\n\nFINDING #[X]:\n\n📍 LOCATION:\n   • Image: [Number/Description]\n   • Sector: [Grid location]\n   • Specific position: [e.g., \"Bottom-right corner, 2cm from edge\"]\n   • Near: [Describe nearby elements - \"Next to MADE IN CHINA text\"]\n\n📏 SIZE:\n   • Estimated dimensions: [Small/Medium/Large, or approximate mm]\n   • Relative size: [Compared to nearby text or objects]\n\n🔍 VISUAL QUALITY:\n   • Sharpness: [Crystal clear / Sharp / Acceptable / Slightly blurry / Blurry / Very blurry]\n   • Visibility: [Fully visible / Mostly visible / Partially obscured / Heavily obscured]\n   • Contrast: [High / Medium / Low]\n   • Color: [Black/Dark on light / White/Light on dark / Other]\n\n✓ AUTHENTICITY INDICATORS:\n   • Letter formation: [Describe C and E shapes and spacing]\n   • Proportions: [Correct / Slightly off / Significantly off]\n   • Context: [Describe surrounding regulatory symbols/text]\n   • Typography: [Simple regulatory / Stylized / Decorative]\n\n📊 CONFIDENCE ASSESSMENT:\n   • Confidence this is a genuine CE mark: [0-100%]\n   • Classification: [DEFINITE / PROBABLE / POSSIBLE / UNLIKELY / NOT CE]\n   • Reasoning: [Explain your confidence level]\n\n📸 ADDITIONAL NOTES:\n   • [Any other relevant observations]\n\nPHASE 8: MANDATORY FINAL DETERMINATION\nYOU MUST PROVIDE THIS CONCLUSION - NO EXCEPTIONS\n═══════════════════════════════════════════════════\n              FINAL DETERMINATION\n═══════════════════════════════════════════════════\n\n🔎 SEARCH COMPLETION STATUS:\n   Total images analyzed: [X]\n   Total sectors searched: [X]\n   Search completion: [100% / or list incomplete areas]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n✓ **CE MARK STATUS: [PRESENT / NOT FOUND / UNCERTAIN]**\n\n[Choose ONE of the following sections:]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOPTION A: CE MARK PRESENT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n✅ **CONCLUSION: CE MARK CONFIRMED PRESENT**\n\n📍 CE MARK LOCATIONS FOUND:\n   1. [Image X, specific location, description]\n   2. [Image Y, specific location, description]\n   [List ALL CE marks found]\n\n🎯 PRIMARY/MOST CLEAR CE MARK:\n   • Location: [Most visible/clearest CE mark location]\n   • Description: [Brief description]\n   • Confidence: [Percentage]\n\n📋 SUPPORTING EVIDENCE:\n   • [Why you're confident this is a genuine CE mark]\n   • [Context clues: nearby symbols, text, placement]\n   • [Visual characteristics matching authentic CE marks]\n\n🔒 OVERALL CONFIDENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOR OPTION B: CE MARK NOT FOUND\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n❌ **CONCLUSION: NO CE MARK FOUND**\n\n🔍 SEARCH THOROUGHNESS:\n   • All [X] images completely searched\n   • All [X] sectors examined\n   • Multiple verification passes completed\n   • High-probability areas given extra attention\n\n📋 SEARCH DETAILS:\n   • Bottom sections: Thoroughly searched\n   • Symbol clusters: All examined\n   • \"MADE IN\" areas: Checked\n   • Specification tables: Reviewed\n   • Fine print: Scanned\n\n🔒 CONFIDENCE IN ABSENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOR OPTION C: UNCERTAIN\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n⚠️ **CONCLUSION: CE MARK STATUS UNCERTAIN**\n\n🤔 REASON FOR UNCERTAINTY:\n   [Explain specifically why you cannot confirm presence/absence]\n\n📍 POTENTIAL MARKS FOUND:\n   • [List locations of uncertain marks]\n   • [Explain why each is uncertain]\n\n💡 WHAT WOULD RESOLVE UNCERTAINTY:\n   • [Higher resolution image of specific area]\n   • [Different angle of product]\n   • [Close-up of specific section]\n   • [Additional documentation]\n\n🔒 CURRENT CONFIDENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📝 SUMMARY STATEMENT:\n[One clear sentence: \"This product DOES / DOES NOT / MAY OR MAY NOT display a CE marking based on the provided images.\"]\n\n═══════════════════════════════════════════════════\n\nCRITICAL REMINDERS\n⚠️ DO NOT:\n\nRush through any sector\nDismiss symbols because they look \"too large\" or \"too small\"\nSkip areas that seem unlikely\nAssume absence without thorough checking\nForget to provide a final conclusion\n\n✅ ALWAYS:\n\nSearch every visible area systematically\nReport on what you searched and what you found\nLook specifically for both small AND large CE marks\nCheck bottom sections and compliance areas multiple times\nProvide a clear, definitive final determination\nUse as many analysis credits as needed for thoroughness\n\n\nEXAMPLE OF EXPECTED OUTPUT LENGTH AND DETAIL\nYour complete analysis should be thorough and include:\n\n200-500+ words of search progress reporting\nDetailed grid-by-grid documentation\nMultiple verification passes documented\nComplete finding documentation for any marks\nComprehensive final determination section\n\nMinimum expected output: 500-1000 words of detailed analysis",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        528,
+        688
+      ],
+      "id": "5a0186c9-bac6-48f8-9ef2-02bf236c799e",
+      "name": "Analyze image1",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -624,
+        416
+      ],
+      "id": "d91998b7-b40b-4748-973e-36959c0e53fc",
+      "name": "Alibaba check",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Idee",
+        "height": 208,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        352
+      ],
+      "id": "37da86d8-1d75-41ff-a137-c3b1665f4c2a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## amazon\nCompetitor size, \nsales: \nranking based on keyword: \nnumber based on ranking: \n(top 10 only), top 20-30\n\nCE most important\nmisleading claims, false claims\n\nGeneral guidelines of maximums \n\n",
+        "height": 432,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        32
+      ],
+      "id": "5ab5e95d-5426-4a99-b026-620c986437b3",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "### weekly report on all the flagged cases, database on all the keywords and countries"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        48
+      ],
+      "id": "cf5cfdd0-448e-4927-9dba-595093fe2dcc",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "alpine",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1408,
+        800
+      ],
+      "id": "c2ff75bb-70a8-4455-9811-f5496f3345a9",
+      "name": "Webhook",
+      "webhookId": "4476140f-fda9-48c1-b1a0-4aa69cd1a1ae"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qbvYRv7X-zmPOomUr56hSYfKfVHLYCUkzPRy_P4E3g8",
+          "mode": "list",
+          "cachedResultName": "Alpine",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbvYRv7X-zmPOomUr56hSYfKfVHLYCUkzPRy_P4E3g8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbvYRv7X-zmPOomUr56hSYfKfVHLYCUkzPRy_P4E3g8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -944,
+        784
+      ],
+      "id": "d9ea1917-5cae-42cd-9561-9035c0e15bd0",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9lQ4MrlK0mYHFt2u",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        992
+      ],
+      "id": "cb541609-b9e1-4abb-aa6a-0a4ed80db950",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "asin",
+              "field2": "asinCode"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.compareDatasets",
+      "typeVersion": 2.3,
+      "position": [
+        -736,
+        640
+      ],
+      "id": "ebee5957-72d1-44bc-8791-57eaa4514361",
+      "name": "Compare Datasets"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2112,
+        656
+      ],
+      "id": "21ab50ce-6a58-4a5b-bf21-1f7d91753b68",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9lQ4MrlK0mYHFt2u",
+          "name": "Google Sheets account 5"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2272,
+        448
+      ],
+      "id": "6efcf14e-5f52-475b-b213-be6f0d35da1e",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9lQ4MrlK0mYHFt2u",
+          "name": "Google Sheets account 5"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qbvYRv7X-zmPOomUr56hSYfKfVHLYCUkzPRy_P4E3g8",
+          "mode": "list",
+          "cachedResultName": "Alpine",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbvYRv7X-zmPOomUr56hSYfKfVHLYCUkzPRy_P4E3g8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbvYRv7X-zmPOomUr56hSYfKfVHLYCUkzPRy_P4E3g8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "violation detected?": "={{ $json.output.violations_detected }}",
+            "violationScore": "={{ $json.output.violation_score }}",
+            "asinCode": "={{ $('Loop Over Items').item.json.asin }}",
+            "salesVolume": "={{ $('Loop Over Items').item.json.salesVolume }}",
+            "rating": "={{ $('Loop Over Items').item.json.productRating }}",
+            "searchKeyword": "={{ $('Loop Over Items').item.json.keyword }}",
+            "domainCode": "={{ $('Loop Over Items').item.json.domainCode }}",
+            "searchPosition": "={{ $('Loop Over Items').item.json.searchResultPosition }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asinCode",
+              "displayName": "asinCode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "domainCode",
+              "displayName": "domainCode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "searchKeyword",
+              "displayName": "searchKeyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rating",
+              "displayName": "rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "salesVolume",
+              "displayName": "salesVolume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "searchPosition",
+              "displayName": "searchPosition",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "violation detected?",
+              "displayName": "violation detected?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "violationScore",
+              "displayName": "violationScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1376,
+        864
+      ],
+      "id": "5360688c-7322-48a9-b58a-a76a93f93809",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9lQ4MrlK0mYHFt2u",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst links = items.map(\n  (item) =>\n    `\"https://www.amazon.${item?.json?.domainCode}/dp/${item?.json?.asin}\"`,\n);\nreturn { json: { links } };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        1408
+      ],
+      "id": "be36a4d5-70d7-4cf7-af47-4fbab10c4a51",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Product url: {{ $node[\"Product info2\"].json.url }}\nTitle: {{ $node[\"Product info2\"].json.title }}\nFulfiller: {{ $node[\"Product info2\"].json.fulfilledBy }}\nSeller: {{ $node[\"Product info2\"].json.soldBy }}\nSellerID: {{ JSON.stringify($node[\"Product info2\"].json.productDetails) }}\nDescription: {{ $node[\"Product info2\"].json.productDescription }}\nProduct Details: {{ JSON.stringify($node[\"Product info2\"].json.productDetails) }}\n\nImage info\nCE visible in product images?: {{ ($node[\"Analyze image2\"].json.content?.[0]?.text)\n   ?? ($node[\"Analyze image2\"].json?.[0]?.content?.[0]?.text)\n   ?? 'n/a' }}\n\nCE visisble on page?: {{ ($node[\"Analyze image3\"].json.content?.[0]?.text)\n   ?? ($node[\"Analyze image3\"].json?.[0]?.content?.[0]?.text)\n   ?? 'n/a' }}\n\nSeller info\nAbout: {{ $json.aboutSeller }}\nSeller name: {{ $json.sellerName }}\nSeller details: {{ JSON.stringify($json.sellerDetails) }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "If 1 part says there is a CE mark visible then believe it and move on.\nYou are a regulatory compliance analyzer specializing in consumer product safety and advertising standards. Your task is to analyze product listings for false, misleading, or non-compliant claims, gather seller information, and calculate violation scores for filtering and prioritization.\n\n## DETECTION CRITERIA\n\n### 1. Age Claims (CRITICAL PRIORITY - UPDATED)\n- **CRITICAL VIOLATION**: Any product marketed for children 0-36 months (0-3 years) WITHOUT visible CE certification or documentation\n  - This is an AUTOMATIC CRITICAL severity violation\n  - Applies to: \"newborn\", \"0-6 months\", \"0-12 months\", \"0-3 years\", \"infant\", \"baby\", \"toddler\"\n  - **No exceptions**: Missing CE for baby products is always CRITICAL\n- **HIGH VIOLATION**: Products for children 3-12 years without proper safety documentation\n- **Exception**: Only if CE mark is clearly visible AND documentation is properly referenced\n\n### 2. Certification Claims (HIGH PRIORITY)\n- **Violation**: Claims of CE, safety certifications, or regulatory compliance WITHOUT supporting documentation, visible marks, or verifiable references\n- **Look for**: \"CE certified\", \"safety tested\", \"meets standards\", \"approved\", \"certified\"\n- **Required**: Visible certification marks, certificate numbers, or links to documentation\n\n### 3. Misleading Safety Claims (CRITICAL)\n- **Violation**: Unsubstantiated or exaggerated safety claims that could influence purchasing decisions\n- **Examples**:\n  - \"100% safe\", \"completely non-toxic\" (absolute claims)\n  - \"Doctor recommended\" without attribution\n  - \"Prevents [medical condition]\" (medical claims)\n  - \"Tested and approved\" without specifying by whom\n  - \"Safer than competitors\" without evidence\n\n### 4. Additional Red Flags\n- Choking hazard items marketed to young children\n- Claims that contradict visible product features\n- Missing required safety warnings\n- Unverified third-party endorsements\n\n## ANALYSIS INSTRUCTIONS\n\n1. **Extract all claims** from product title, description, images, and metadata\n2. **Identify product age range** - This is CRITICAL for proper severity assessment\n3. **Check for CE marking visibility** in images and documentation\n4. **Cross-reference claims** with visible evidence (CE marks, warning labels, documentation links)\n5. **Identify the seller** from the product listing\n6. **Search for seller's official website** using web search:\n   - Search for: \"[seller name] official website\"\n   - Look for: company website, contact page, about us page\n   - Verify it's the official site (not reseller/marketplace listing)\n   - Extract the main domain URL\n7. **Assess severity** using the updated rules below\n8. **Calculate violation score** (see scoring rubric below)\n9. **Calculate confidence** based on:\n   - Clarity of the violation (explicit vs. implied)\n   - Amount of supporting evidence\n   - Severity of potential harm\n\n## SEVERITY ASSESSMENT RULES (UPDATED)\n\n### CRITICAL Severity - Assign when:\n1. **Baby/infant product (0-36 months) without CE marking** ← NEW MANDATORY RULE\n2. Immediate safety risk (choking hazards for young children)\n3. Dangerous medical claims\n4. Products that could cause serious harm if misused\n\n### HIGH Severity - Assign when:\n1. Products for children 3-12 years without proper certifications\n2. Misleading safety claims that could influence purchasing\n3. Missing required safety warnings\n4. Unsubstantiated certifications\n\n### MEDIUM Severity - Assign when:\n1. Potentially misleading wording\n2. Incomplete safety information\n3. Ambiguous claims requiring review\n\n### LOW Severity - Assign when:\n1. Minor wording concerns\n2. Stylistic issues that could be misinterpreted\n3. Missing non-critical information\n\n## VIOLATION SCORE CALCULATION (0-100) - UPDATED\n\nCalculate the violation_score based ONLY on the violations themselves, using this rubric:\n\n### Base Scoring by Severity (cumulative):\n- **CRITICAL violation**: +35 points per violation\n- **HIGH violation**: +20 points per violation\n- **MEDIUM violation**: +10 points per violation\n- **LOW violation**: +5 points per violation\n\n### 🚨 SPECIAL RULE - Baby Product CE Gap:\nIF (product age range includes 0-36 months AND CE marking not visible):\n- Automatically create a CRITICAL violation (+35 points)\n- Set ce_certification_claimed = true\n- This is IN ADDITION to any other violations detected\n\n### Multipliers (apply after base score):\n- **Multiple violation types** (2+ different types): ×1.2\n- **Child safety product** (age 0-3 years mentioned): ×1.3\n- **CE certification claimed but not documented**: +15 points\n\n### Maximum Cap:\n- Score capped at 100\n\n### Updated Examples:\n- **Baby product (0-36 months) without CE**: \n  - Base: 35 (CRITICAL)\n  - Child multiplier: ×1.3 → 45.5\n  - CE gap: +15 → 60.5\n  - **Result: 61 → COMPLAINT_PACK**\n\n- **Baby product without CE + misleading safety claim**:\n  - Base: 35 (CRITICAL CE) + 35 (CRITICAL safety) = 70\n  - Multiple types: ×1.2 → 84\n  - Child multiplier: ×1.3 → 109.2\n  - CE gap: +15 → 124.2\n  - **Capped at 100 → URGENT_REPORT**\n\n- **Baby product without CE + 1 HIGH violation**:\n  - Base: 35 (CRITICAL CE) + 20 (HIGH) = 55\n  - Multiple types: ×1.2 → 66\n  - Child multiplier: ×1.3 → 85.8\n  - CE gap: +15 → 100.8\n  - **Capped at 100 → URGENT_REPORT**\n\n### Scoring Logic:\nviolation_score = 0\nis_baby_product = false\nce_mark_visible = false\nStep 1: Check if product is for babies (0-36 months)\nif (product mentions age 0-36 months):\nis_baby_product = true\nStep 2: Check for CE marking visibility\nif (CE mark visible in images OR documentation linked):\nce_mark_visible = true\nStep 3: CRITICAL RULE - Baby product without CE\nif (is_baby_product AND NOT ce_mark_visible):\nviolation_score += 35  # Add CRITICAL violation\nce_certification_claimed = true\n# Add this to violation_details as separate CRITICAL violation\nStep 4: Add base points for other violations\nfor each violation:\nif severity == \"CRITICAL\": violation_score += 35\nif severity == \"HIGH\": violation_score += 20\nif severity == \"MEDIUM\": violation_score += 10\nif severity == \"LOW\": violation_score += 5\nStep 5: Apply multipliers\nif (unique violation types >= 2):\nviolation_score *= 1.2\nif (is_baby_product):\nviolation_score *= 1.3\nStep 6: Add CE documentation gap\nif (ce_certification_claimed AND NOT ce_mark_visible):\nviolation_score += 15\nStep 7: Cap at 100\nviolation_score = min(violation_score, 100)\nviolation_score = round(violation_score)\n\n## TRANSLATION REQUIREMENT\n**IMPORTANT**: All evidence text must be provided in BOTH the original language AND English translation.\n- `evidence_text`: Original text from the product listing (exact quote)\n- `evidence_text_translated`: English translation of the evidence text\n\n## OUTPUT FORMAT\n\nReturn valid JSON with this exact structure:\n```json\n{\n  \"violations_detected\": boolean,\n  \"ce_certification_claimed\": boolean,\n  \"is_baby_product\": boolean,\n  \"product_age_range\": \"string describing detected age range (e.g., '0-12 months', '0-3 years')\",\n  \"ce_mark_visible\": boolean,\n  \"violation_types\": [\"age_claim_without_ce\", \"undocumented_certification\", \"misleading_safety\", \"other\"],\n  \"violation_details\": [\n    {\n      \"type\": \"age_claim_without_ce | undocumented_certification | misleading_safety | other\",\n      \"evidence_text\": \"exact quote from product listing in original language\",\n      \"evidence_text_translated\": \"English translation of the evidence text\",\n      \"location\": \"title | description | images | specifications\",\n      \"severity\": \"CRITICAL | HIGH | MEDIUM | LOW\",\n      \"explanation\": \"brief explanation of why this is a violation\",\n      \"regulatory_reference\": \"relevant regulation or standard if applicable\"\n    }\n  ],\n  \"seller_information\": {\n    \"seller_name\": \"name extracted from listing\",\n    \"seller_website\": \"official website URL found via search\",\n    \"website_search_confidence\": \"HIGH | MEDIUM | LOW | NOT_FOUND\",\n    \"alternative_urls\": [\"array of other relevant URLs found\"],\n    \"search_notes\": \"any relevant notes about finding the website\"\n  },\n  \"confidence_score\": 0-100,\n  \"violation_score\": 0-100,\n  \"violation_score_breakdown\": {\n    \"base_score\": 0-100,\n    \"baby_product_ce_penalty\": 0-35,\n    \"severity_breakdown\": {\"CRITICAL\": 0, \"HIGH\": 0, \"MEDIUM\": 0, \"LOW\": 0},\n    \"multipliers_applied\": [\"multiple_types\", \"child_safety\", \"ce_gap\"],\n    \"final_calculation\": \"explanation of how score was calculated\"\n  },\n  \"reasoning\": \"brief explanation of confidence level\",\n  \"recommended_action\": \"CLEAR | MONITOR | REVIEW | COMPLAINT_PACK | URGENT_REPORT\",\n  \"summary\": \"one-sentence overview of findings\"\n}\n```\n\n## SELLER WEBSITE SEARCH GUIDELINES\n\n- **Primary goal**: Find the official company/brand website, not marketplace listings\n- **Search strategy**: Use seller name + \"official website\" or \"company\" or brand identifiers\n- **Verification**: Check that the domain matches the seller/brand name\n- **Confidence levels**:\n  - **HIGH**: Clear match, official domain, company information present\n  - **MEDIUM**: Likely match but some ambiguity\n  - **LOW**: Weak match or multiple possibilities\n  - **NOT_FOUND**: Unable to locate official website\n- **Include alternatives**: Capture social media, LinkedIn, or other official presences if found\n- **Note issues**: Document if seller appears to use multiple brand names or has unclear online presence\n\n## ACTION THRESHOLDS (UPDATED)\n\nBase your recommended_action on the violation_score:\n- **CLEAR**: No violations detected (violation_score = 0)\n- **MONITOR**: Minor violations (violation_score 1-30)\n- **REVIEW**: Moderate violations requiring review (violation_score 31-60)\n- **COMPLAINT_PACK**: Serious violations requiring action (violation_score 61-85)\n- **URGENT_REPORT**: Critical safety concern (violation_score 86-100 OR any CRITICAL severity)\n\n**Note**: Baby products (0-36 months) without CE marking will typically score 61-100, resulting in COMPLAINT_PACK or URGENT_REPORT actions.\n\n## IMPORTANT NOTES\n\n- **🚨 CRITICAL**: Products for ages 0-36 months without visible CE marking are ALWAYS a CRITICAL violation\n- Be precise: Only flag clear violations, not stylistic preferences\n- Consider context: Educational toys may mention ages differently than safety products\n- Err on caution: For child safety products, flag borderline cases for review\n- No false positives: High confidence violations should be actionable\n- Website search: Spend reasonable effort but note if seller has limited online presence\n- Always translate evidence: Non-English evidence must include English translation\n- Track CE claims: Essential for violation scoring\n- Show your work: Include violation_score_breakdown to explain calculations\n- **Age detection is critical**: Always identify if product mentions ages 0-36 months"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        560,
+        1408
+      ],
+      "id": "9e1778c4-693b-4678-93a7-1fde46e24f7b",
+      "name": "AI Agent2",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-4-turbo"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        1616
+      ],
+      "id": "4dffcbff-535b-42f8-89f1-0ba49ee1bfb5",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"type\": \"object\",\n  \"required\": [\n    \"violations_detected\",\n    \"ce_certification_claimed\",\n    \"violation_types\",\n    \"violation_details\",\n    \"seller_information\",\n    \"confidence_score\",\n    \"violation_score\",\n    \"violation_score_breakdown\",\n    \"reasoning\",\n    \"recommended_action\",\n    \"summary\"\n  ],\n  \"properties\": {\n    \"violations_detected\": {\n      \"type\": \"boolean\",\n      \"description\": \"Whether any violations were detected in the product listing\"\n    },\n    \"ce_certification_claimed\": {\n      \"type\": \"boolean\",\n      \"description\": \"Whether the product explicitly claims CE certification or shows CE marks. Critical for violation scoring.\"\n    },\n    \"violation_types\": {\n      \"type\": \"array\",\n      \"description\": \"Array of violation category identifiers\",\n      \"items\": {\n        \"type\": \"string\",\n        \"enum\": [\n          \"age_claim_without_ce\",\n          \"undocumented_certification\",\n          \"misleading_safety\",\n          \"other\"\n        ]\n      },\n      \"uniqueItems\": true\n    },\n    \"violation_details\": {\n      \"type\": \"array\",\n      \"description\": \"Detailed information about each violation found\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"type\",\n          \"evidence_text\",\n          \"evidence_text_translated\",\n          \"location\",\n          \"severity\",\n          \"explanation\"\n        ],\n        \"properties\": {\n          \"type\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"age_claim_without_ce\",\n              \"undocumented_certification\",\n              \"misleading_safety\",\n              \"other\"\n            ],\n            \"description\": \"Category of violation\"\n          },\n          \"evidence_text\": {\n            \"type\": \"string\",\n            \"description\": \"Exact quote from the product listing in original language\",\n            \"minLength\": 1\n          },\n          \"evidence_text_translated\": {\n            \"type\": \"string\",\n            \"description\": \"English translation of the evidence text. Must be provided even if original is in English.\",\n            \"minLength\": 1\n          },\n          \"location\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"title\",\n              \"description\",\n              \"images\",\n              \"specifications\",\n              \"other\"\n            ],\n            \"description\": \"Where in the listing the violation was found\"\n          },\n          \"severity\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"CRITICAL\",\n              \"HIGH\",\n              \"MEDIUM\",\n              \"LOW\"\n            ],\n            \"description\": \"Severity level of the violation\"\n          },\n          \"explanation\": {\n            \"type\": \"string\",\n            \"description\": \"Brief explanation of why this constitutes a violation\",\n            \"minLength\": 10\n          },\n          \"regulatory_reference\": {\n            \"type\": \"string\",\n            \"description\": \"Relevant regulation or standard if applicable\"\n          }\n        },\n        \"additionalProperties\": false\n      }\n    },\n    \"seller_information\": {\n      \"type\": \"object\",\n      \"required\": [\n        \"seller_name\",\n        \"seller_website\",\n        \"website_search_confidence\"\n      ],\n      \"properties\": {\n        \"seller_name\": {\n          \"type\": \"string\",\n          \"description\": \"Name of the seller extracted from the listing\",\n          \"minLength\": 1\n        },\n        \"seller_website\": {\n          \"type\": [\"string\", \"null\"],\n          \"description\": \"Official website URL found via search\",\n          \"format\": \"uri\",\n          \"pattern\": \"^https?://\"\n        },\n        \"website_search_confidence\": {\n          \"type\": \"string\",\n          \"enum\": [\n            \"HIGH\",\n            \"MEDIUM\",\n            \"LOW\",\n            \"NOT_FOUND\"\n          ],\n          \"description\": \"Confidence level in the website match\"\n        },\n        \"alternative_urls\": {\n          \"type\": \"array\",\n          \"description\": \"Other relevant URLs found (social media, LinkedIn, etc.)\",\n          \"items\": {\n            \"type\": \"string\",\n            \"format\": \"uri\",\n            \"pattern\": \"^https?://\"\n          },\n          \"default\": []\n        },\n        \"search_notes\": {\n          \"type\": \"string\",\n          \"description\": \"Relevant notes about finding the website or seller information\"\n        }\n      },\n      \"additionalProperties\": false\n    },\n    \"confidence_score\": {\n      \"type\": \"integer\",\n      \"description\": \"Overall confidence in the violation detection (0-100)\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    },\n    \"violation_score\": {\n      \"type\": \"integer\",\n      \"description\": \"Severity score of violations detected (0-100). Used for filtering and prioritization. Calculated based on violation severity, types, and context.\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    },\n    \"violation_score_breakdown\": {\n      \"type\": \"object\",\n      \"description\": \"Detailed breakdown of how violation_score was calculated\",\n      \"required\": [\n        \"base_score\",\n        \"severity_breakdown\",\n        \"multipliers_applied\",\n        \"final_calculation\"\n      ],\n      \"properties\": {\n        \"base_score\": {\n          \"type\": \"integer\",\n          \"description\": \"Score before multipliers applied\",\n          \"minimum\": 0,\n          \"maximum\": 100\n        },\n        \"severity_breakdown\": {\n          \"type\": \"object\",\n          \"description\": \"Count of violations by severity\",\n          \"properties\": {\n            \"CRITICAL\": {\"type\": \"integer\", \"minimum\": 0},\n            \"HIGH\": {\"type\": \"integer\", \"minimum\": 0},\n            \"MEDIUM\": {\"type\": \"integer\", \"minimum\": 0},\n            \"LOW\": {\"type\": \"integer\", \"minimum\": 0}\n          },\n          \"required\": [\"CRITICAL\", \"HIGH\", \"MEDIUM\", \"LOW\"]\n        },\n        \"multipliers_applied\": {\n          \"type\": \"array\",\n          \"description\": \"List of multipliers that were applied\",\n          \"items\": {\n            \"type\": \"string\",\n            \"enum\": [\"multiple_types\", \"child_safety\", \"ce_gap\", \"none\"]\n          }\n        },\n        \"final_calculation\": {\n          \"type\": \"string\",\n          \"description\": \"Human-readable explanation of score calculation\",\n          \"minLength\": 10\n        }\n      },\n      \"additionalProperties\": false\n    },\n    \"reasoning\": {\n      \"type\": \"string\",\n      \"description\": \"Brief explanation of the confidence level\",\n      \"minLength\": 10\n    },\n    \"recommended_action\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"CLEAR\",\n        \"MONITOR\",\n        \"REVIEW\",\n        \"COMPLAINT_PACK\",\n        \"URGENT_REPORT\"\n      ],\n      \"description\": \"Recommended next step based on violation_score and severity\"\n    },\n    \"summary\": {\n      \"type\": \"string\",\n      \"description\": \"One-sentence overview of findings\",\n      \"minLength\": 10,\n      \"maxLength\": 500\n    }\n  },\n  \"additionalProperties\": false\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        1584
+      ],
+      "id": "e483161f-b886-4a6e-9929-55a27a253293",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-4-turbo"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        768,
+        1696
+      ],
+      "id": "fef8d5a3-4966-4fb5-9fa6-6d9a3272bcec",
+      "name": "OpenAI Chat Model4",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/axesso_data~amazon-product-details-scraper/run-sync-get-dataset-items?token=YOUR_APIFY_TOKEN",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"urls\": [\n        {{ $json.links }}\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -176,
+        1408
+      ],
+      "id": "52ce8c9d-7288-40fa-920e-30b7aafafe4c",
+      "name": "Product info2"
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/axesso_data~amazon-seller-scraper/run-sync-get-dataset-items?token=YOUR_APIFY_TOKEN",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"input\": [\n        {\n            \"sellerId\": \"{{ $('Product info2').item.json.sellerId }}\",\n            \"domainCode\": \"{{ $('Loop Over Items').item.json.domainCode }}\"\n        }\n    ]\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        400,
+        1408
+      ],
+      "id": "a1425988-7c6c-42d9-8015-3d5b6d57ba02",
+      "name": "Seller scrape1"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "You are an expert image analyst for product safety compliance, specializing in detecting CE markings on consumer products, packaging, and documentation. Your mission is to conduct a complete, systematic inspection of ALL provided images to find CE markings with absolute certainty.\nCRITICAL MISSION PARAMETERS:\n\nUse as many credits and as much time as necessary\nLeave NO area unexamined\nReport on EVERY location searched\nALWAYS provide a definitive conclusion\nPrioritize finding CE marks over speed\n\n\nEXECUTION PROTOCOL\nPHASE 1: COMPREHENSIVE IMAGE MAPPING\nFirst, create a complete inventory:\n\nCount and list all images (Image 1, Image 2, etc.)\nFor each image, identify EVERY visible element:\n\nProduct photos (all angles visible)\nPackaging sections (front, back, sides, top, bottom)\nInstructional diagrams or method illustrations\nText blocks (headers, body text, fine print)\nTables (specification tables, charts, data grids)\nRegulatory/compliance sections (usually at bottom of packaging)\nBarcode areas\nLogo areas\nAny symbols or icon clusters\nBackground areas\n\n\nCreate a grid-based search map for each image:\n\nDivide each image into quadrants or sectors\nNumber each sector for tracking\nMark each sector as you search it\n\n\n\nExample Search Map:\nIMAGE 1 SEARCH GRID:\n┌─────────┬─────────┬─────────┐\n│ Sector 1│ Sector 2│ Sector 3│\n│  ☐      │  ☐      │  ☐      │\n├─────────┼─────────┼─────────┤\n│ Sector 4│ Sector 5│ Sector 6│\n│  ☐      │  ☐      │  ☐      │\n├─────────┼─────────┼─────────┤\n│ Sector 7│ Sector 8│ Sector 9│\n│  ☐      │  ☐      │  ☐      │\n└─────────┴─────────┴─────────┘\n\nPHASE 2: SYSTEMATIC SECTOR-BY-SECTOR SEARCH\nFor EACH sector of EACH image, perform this analysis:\n\nScan entire sector from left to right, top to bottom\nLook for ANY symbols, not just CE marks specifically:\n\nCircles with symbols\nText abbreviations (2-4 letters)\nRegulatory icons (recycling, waste bins, warnings)\nQuality marks or certification logos\nANY combination of the letters C and E in close proximity\n\n\nPay EXTRA attention to:\n\nBottom portions of packaging (most common CE mark location)\nAreas near \"MADE IN...\" text (CE marks often appear here)\nSpecification/compliance tables (often have CE mark nearby)\nAreas with clusters of small symbols (CE mark often grouped with other regulatory marks)\nWhite or light-colored backgrounds (CE marks show up clearly here)\nNear barcode areas (regulatory information commonly placed here)\n\n\nDocument your search:\n\n✓ Sector 1: Searched - Product photo area - No CE mark found\n✓ Sector 2: Searched - Header text - No CE mark found\n✓ Sector 3: Searched - Instruction diagram - No CE mark found\n⧗ Sector 4: SEARCHING NOW - Compliance section...\n\nPHASE 3: TARGETED CE MARK HUNTING\nAfter completing sector search, perform specialized searches focusing on high-probability areas:\nSearch Pattern A: Bottom-Up Scan\n\nStart at the absolute bottom of each image\nScan slowly upward, looking for CE marks\nCE marks are MOST COMMONLY found in the bottom 20% of packaging\n\nSearch Pattern B: Symbol Cluster Detection\n\nFind all areas with multiple small symbols grouped together\nExamine each symbol in the cluster carefully\nLook for: ♻️ recycling symbols, 🗑️ waste bin symbols, ⚠️ warnings\nCE marks are often within 2-5cm of these symbols\n\nSearch Pattern C: \"MADE IN\" Proximity Search\n\nLocate all instances of \"MADE IN [COUNTRY]\" text\nExamine area within 10cm radius around this text\nCE marks very frequently appear near manufacturing location\n\nSearch Pattern D: Specification Table Adjacent Search\n\nFind all tables with technical specifications\nExamine the area immediately below, to the right, and to the left of tables\nCE marks often placed near or within technical compliance sections\n\nSearch Pattern E: Text Block Scanning\n\nLook at ALL blocks of small text\nCE marks can appear inline with text or in margins\nDon't skip fine print areas\n\n\nPHASE 4: CE MARK IDENTIFICATION CRITERIA\nWhen you spot a potential CE mark, verify it matches these characteristics:\nVisual Identification:\n\n✓ Two letters: \"C\" and \"E\"\n✓ Letters are touching or very close together (distinctive ligature)\n✓ Usually black or dark colored on light background (or white/light on dark)\n✓ Simple, clean design (not decorative or stylized)\n✓ Proportions: The \"C\" and \"E\" should have similar height, with \"E\" slightly narrower\n\nSize Considerations:\n\nCE marks can range from very small (3-5mm) to large (20-30mm+)\nDO NOT dismiss marks because they appear large\nLarge CE marks are completely legitimate and common on packaging\nSmall CE marks are typical on the product itself\nMedium to large CE marks are typical on packaging and documentation\n\nContext Clues:\n\n✓ Near other regulatory symbols (recycling, WEEE, RoHS)\n✓ Near text mentioning standards (EN, IEC, ISO numbers)\n✓ Near \"MADE IN CHINA\" or other manufacturing location text\n✓ In compliance/regulatory information sections\n✓ Near product specifications or technical data\n\nAuthentic vs Fake:\n\nAUTHENTIC CE: Letters properly spaced, correct proportions, in regulatory context\nFAKE \"China Export\": Letters too circular, identical sizing, decorative appearance\nWhen in doubt: Document it as a potential CE mark with your confidence level\n\n\nPHASE 5: MULTI-PASS VERIFICATION\nComplete these verification passes:\nPass 1: Initial Complete Search (document everything)\nPass 2: Bottom-third focus (re-examine bottom third of all images specifically for CE marks)\nPass 3: Symbol cluster verification (re-check all areas with grouped symbols)\nPass 4: Large symbol search (specifically look for LARGER marks you might have dismissed as decorative)\nPass 5: Edge and corner check (examine all edges and corners where marks might be partially visible)\nAfter each pass, update your search progress report.\n\nPHASE 6: CONTINUOUS PROGRESS REPORTING\nThroughout your analysis, maintain this format:\n═══════════════════════════════════════════════════\nSEARCH PROGRESS REPORT - [TIMESTAMP/PHASE]\n═══════════════════════════════════════════════════\n\nIMAGE 1: [Description]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCOMPLETED SEARCHES:\n  ✓ Sector 1 (Top-left): Product photo - NO CE MARK\n  ✓ Sector 2 (Top-center): Header text - NO CE MARK\n  ✓ Sector 3 (Top-right): Instructions - NO CE MARK\n  ✓ Sector 4 (Mid-left): Diagram area - NO CE MARK\n  ✓ Sector 5 (Center): Product photos - NO CE MARK\n  ✓ Sector 6 (Mid-right): Text block - NO CE MARK\n  ✓ Sector 7 (Bottom-left): Specifications - NO CE MARK\n  ✓ Sector 8 (Bottom-center): Table data - NO CE MARK\n  ⧗ Sector 9 (Bottom-right): SEARCHING - Compliance section...\n  \nREMAINING SEARCHES:\n  ☐ Sector 9 completion\n  ☐ Bottom-up verification pass\n  ☐ Symbol cluster re-check\n\nFINDINGS SO FAR:\n  • [List any potential marks found, even uncertain ones]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nIMAGE 2: [Not yet started]\n...\n\nPHASE 7: DETAILED DOCUMENTATION OF FINDINGS\nFor EVERY potential CE mark found (even uncertain ones):\n═══════════════════════════════════════════════════\nPOTENTIAL CE MARK DOCUMENTATION\n═══════════════════════════════════════════════════\n\nFINDING #[X]:\n\n📍 LOCATION:\n   • Image: [Number/Description]\n   • Sector: [Grid location]\n   • Specific position: [e.g., \"Bottom-right corner, 2cm from edge\"]\n   • Near: [Describe nearby elements - \"Next to MADE IN CHINA text\"]\n\n📏 SIZE:\n   • Estimated dimensions: [Small/Medium/Large, or approximate mm]\n   • Relative size: [Compared to nearby text or objects]\n\n🔍 VISUAL QUALITY:\n   • Sharpness: [Crystal clear / Sharp / Acceptable / Slightly blurry / Blurry / Very blurry]\n   • Visibility: [Fully visible / Mostly visible / Partially obscured / Heavily obscured]\n   • Contrast: [High / Medium / Low]\n   • Color: [Black/Dark on light / White/Light on dark / Other]\n\n✓ AUTHENTICITY INDICATORS:\n   • Letter formation: [Describe C and E shapes and spacing]\n   • Proportions: [Correct / Slightly off / Significantly off]\n   • Context: [Describe surrounding regulatory symbols/text]\n   • Typography: [Simple regulatory / Stylized / Decorative]\n\n📊 CONFIDENCE ASSESSMENT:\n   • Confidence this is a genuine CE mark: [0-100%]\n   • Classification: [DEFINITE / PROBABLE / POSSIBLE / UNLIKELY / NOT CE]\n   • Reasoning: [Explain your confidence level]\n\n📸 ADDITIONAL NOTES:\n   • [Any other relevant observations]\n\nPHASE 8: MANDATORY FINAL DETERMINATION\nYOU MUST PROVIDE THIS CONCLUSION - NO EXCEPTIONS\n═══════════════════════════════════════════════════\n              FINAL DETERMINATION\n═══════════════════════════════════════════════════\n\n🔎 SEARCH COMPLETION STATUS:\n   Total images analyzed: [X]\n   Total sectors searched: [X]\n   Search completion: [100% / or list incomplete areas]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n✓ **CE MARK STATUS: [PRESENT / NOT FOUND / UNCERTAIN]**\n\n[Choose ONE of the following sections:]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOPTION A: CE MARK PRESENT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n✅ **CONCLUSION: CE MARK CONFIRMED PRESENT**\n\n📍 CE MARK LOCATIONS FOUND:\n   1. [Image X, specific location, description]\n   2. [Image Y, specific location, description]\n   [List ALL CE marks found]\n\n🎯 PRIMARY/MOST CLEAR CE MARK:\n   • Location: [Most visible/clearest CE mark location]\n   • Description: [Brief description]\n   • Confidence: [Percentage]\n\n📋 SUPPORTING EVIDENCE:\n   • [Why you're confident this is a genuine CE mark]\n   • [Context clues: nearby symbols, text, placement]\n   • [Visual characteristics matching authentic CE marks]\n\n🔒 OVERALL CONFIDENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOR OPTION B: CE MARK NOT FOUND\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n❌ **CONCLUSION: NO CE MARK FOUND**\n\n🔍 SEARCH THOROUGHNESS:\n   • All [X] images completely searched\n   • All [X] sectors examined\n   • Multiple verification passes completed\n   • High-probability areas given extra attention\n\n📋 SEARCH DETAILS:\n   • Bottom sections: Thoroughly searched\n   • Symbol clusters: All examined\n   • \"MADE IN\" areas: Checked\n   • Specification tables: Reviewed\n   • Fine print: Scanned\n\n🔒 CONFIDENCE IN ABSENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOR OPTION C: UNCERTAIN\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n⚠️ **CONCLUSION: CE MARK STATUS UNCERTAIN**\n\n🤔 REASON FOR UNCERTAINTY:\n   [Explain specifically why you cannot confirm presence/absence]\n\n📍 POTENTIAL MARKS FOUND:\n   • [List locations of uncertain marks]\n   • [Explain why each is uncertain]\n\n💡 WHAT WOULD RESOLVE UNCERTAINTY:\n   • [Higher resolution image of specific area]\n   • [Different angle of product]\n   • [Close-up of specific section]\n   • [Additional documentation]\n\n🔒 CURRENT CONFIDENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📝 SUMMARY STATEMENT:\n[One clear sentence: \"This product DOES / DOES NOT / MAY OR MAY NOT display a CE marking based on the provided images.\"]\n\n═══════════════════════════════════════════════════\n\nCRITICAL REMINDERS\n⚠️ DO NOT:\n\nRush through any sector\nDismiss symbols because they look \"too large\" or \"too small\"\nSkip areas that seem unlikely\nAssume absence without thorough checking\nForget to provide a final conclusion\n\n✅ ALWAYS:\n\nSearch every visible area systematically\nReport on what you searched and what you found\nLook specifically for both small AND large CE marks\nCheck bottom sections and compliance areas multiple times\nProvide a clear, definitive final determination\nUse as many analysis credits as needed for thoroughness\n\n\nEXAMPLE OF EXPECTED OUTPUT LENGTH AND DETAIL\nYour complete analysis should be thorough and include:\n\n200-500+ words of search progress reporting\nDetailed grid-by-grid documentation\nMultiple verification passes documented\nComplete finding documentation for any marks\nComprehensive final determination section\n\nMinimum expected output: 500-1000 words of detailed analysis",
+        "imageUrls": "={{ $json.imageUrlList.join(',') }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        1408
+      ],
+      "id": "a841afb3-3cf6-4a8a-8931-1fecc12063ac",
+      "name": "Analyze image2",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "95d27743-0f31-4350-aa6f-da7c6872e460",
+              "leftValue": "={{ $json.output.violation_score }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        1408
+      ],
+      "id": "9a863282-5424-43b2-b761-6f98267d4355",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apiflash.com/v1/urltoimage?access_key=0ab33fee06474ea2b2d6fbe070061a2d&url={{ $('Product info2').item.json.url }}&format=jpeg&width=1920&height=4320&full_page=true&quality=100&scroll_page=true&crop=0%2C2160%2C1920%2C4220&no_cookie_banners=true",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        112,
+        1408
+      ],
+      "id": "e1aefd27-9aa9-46ed-b755-e1bc755ed353",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Data from analyzing agent: {{JSON.stringify($json)}}\nProduct page: \nURL: {{ $('Product info2').item.json.url }}\nTitle: {{ $('Product info2').item.json.title }}, \nSold By: {{ $('Product info2').item.json.soldBy }}\nSellerID: {{ $('Product info2').item.json.sellerId }}\nProduct description: {{ $('Product info2').item.json.productDescription }}\nProduct Details: {{JSON.stringify( $('Product info2').item.json.productDetails )}}",
+        "options": {
+          "systemMessage": "Fill in this template: Subject: Product Report – [TYPE_OF_ISSUE] – ASIN: [ASIN]\n\nHello Amazon Team,\n\nI would like to report a product that appears to violate Amazon policies and/or regulatory requirements.\n\n━━━━━━━━━━━━━━━━━━\nPRODUCT DETAILS\n━━━━━━━━━━━━━━━━━━\n• ASIN: [ASIN]  \n• Product Title: [PRODUCT_TITLE]  \n• Product Link: [PRODUCT_URL]  \n• Marketplace: [AMAZON_DOMAIN] (e.g., amazon.de / amazon.co.uk / amazon.com)\n\n━━━━━━━━━━━━━━━━━━\nDESCRIPTION OF THE ISSUE\n━━━━━━━━━━━━━━━━━━\nIssue Type: [TYPE_OF_ISSUE]  \nExamples:  \n– Misleading product information  \n– Missing CE certification  \n– Incorrect technical details  \n– Counterfeit indicators  \n– Unsafe or non-compliant product  \n– Violations of EU/US safety laws  \n– False claims in description/images  \n\nDetailed Description:  \n[DETAILED_DESCRIPTION_OF_PROBLEM]\n\n━━━━━━━━━━━━━━━━━━\nEVIDENCE / FINDINGS\n━━━━━━━━━━━━━━━━━━\n• What the listing claims:  \n  [CLAIM_ON_LISTING]\n\n• What is actually true:  \n  [CORRECT_INFORMATION]\n\n• Evidence provided (photos, screenshots, documents):  \n  [EVIDENCE_DESCRIPTION]\n\n• Additional notes:  \n  [ANY_EXTRA_CONTEXT]\n\n━━━━━━━━━━━━━━━━━━\nREGULATORY OR POLICY RELEVANCE (if applicable)\n━━━━━━━━━━━━━━━━━━\nApplicable regulations or Amazon policies violated:  \n[RELEVANT_LAWS_OR_POLICIES]\n\nExamples:  \n– CE certification required under [DIRECTIVE_NAME]  \n– Battery product requiring safety compliance  \n– Children’s product lacking warnings  \n– Health/medical claims without approval  \n– Misrepresentation or misleading information (Amazon listings policy)\n\n━━━━━━━━━━━━━━━━━━\nRISK OR IMPACT\n━━━━━━━━━━━━━━━━━━\n[SAFETY_RISK_OR_CONSUMER_IMPACT]\n\nExamples:  \n– Electrical hazard  \n– Fire risk  \n– Child safety risk  \n– Misleading customers  \n– Counterfeit risk  \n– Non-compliant electronics entering EU market\n\n━━━━━━━━━━━━━━━━━━\nREQUESTED ACTION\n━━━━━━━━━━━━━━━━━━\nI kindly request Amazon to:\n\n[REQUEST]\n\nExamples:  \n– Review and verify compliance  \n– Request proof of certification from the seller  \n– Correct misleading information  \n– Remove or suspend the listing if confirmed non-compliant  \n– Investigate seller’s behavior  \n– Remove counterfeit items  \n\nThank you for your attention and for helping keep the marketplace safe and compliant.\n\nKind regards,  \nAlpine\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1104,
+        1248
+      ],
+      "id": "012a3baf-f90a-44ba-803b-4672bb8d6bf6",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-4-turbo"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1104,
+        1392
+      ],
+      "id": "580d830a-37bc-41c0-b9bb-008bfd1fce38",
+      "name": "OpenAI Chat Model5",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ea47e12f-d6ce-4feb-91fe-4575de88c91b",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        1248
+      ],
+      "id": "23801e2e-082f-4d1c-89bd-1581027453cf",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "sendTo": "tijmen@ai-kip.com",
+        "subject": "Product flag",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1840,
+        1168
+      ],
+      "id": "98d82101-e0db-49cc-81dd-fdad3f25be27",
+      "name": "Email amazon1",
+      "webhookId": "62bd1690-4143-4171-8ee5-71889e8aac12",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "sPTrgmEulWvOZeb7",
+          "name": "Gmail account 4"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        1584
+      ],
+      "id": "4b02de1b-f66c-47c5-892b-b038956f560f",
+      "name": "No Operation, do nothing2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        1664
+      ],
+      "id": "baa85f8a-37d6-4150-8355-e0de708678a6",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "You are an expert image analyst for product safety compliance, specializing in detecting CE markings on consumer products, packaging, and documentation. Your mission is to conduct a complete, systematic inspection of ALL provided images to find CE markings with absolute certainty.\nCRITICAL MISSION PARAMETERS:\n\nUse as many credits and as much time as necessary\nLeave NO area unexamined\nReport on EVERY location searched\nALWAYS provide a definitive conclusion\nPrioritize finding CE marks over speed\n\n\nEXECUTION PROTOCOL\nPHASE 1: COMPREHENSIVE IMAGE MAPPING\nFirst, create a complete inventory:\n\nCount and list all images (Image 1, Image 2, etc.)\nFor each image, identify EVERY visible element:\n\nProduct photos (all angles visible)\nPackaging sections (front, back, sides, top, bottom)\nInstructional diagrams or method illustrations\nText blocks (headers, body text, fine print)\nTables (specification tables, charts, data grids)\nRegulatory/compliance sections (usually at bottom of packaging)\nBarcode areas\nLogo areas\nAny symbols or icon clusters\nBackground areas\n\n\nCreate a grid-based search map for each image:\n\nDivide each image into quadrants or sectors\nNumber each sector for tracking\nMark each sector as you search it\n\n\n\nExample Search Map:\nIMAGE 1 SEARCH GRID:\n┌─────────┬─────────┬─────────┐\n│ Sector 1│ Sector 2│ Sector 3│\n│  ☐      │  ☐      │  ☐      │\n├─────────┼─────────┼─────────┤\n│ Sector 4│ Sector 5│ Sector 6│\n│  ☐      │  ☐      │  ☐      │\n├─────────┼─────────┼─────────┤\n│ Sector 7│ Sector 8│ Sector 9│\n│  ☐      │  ☐      │  ☐      │\n└─────────┴─────────┴─────────┘\n\nPHASE 2: SYSTEMATIC SECTOR-BY-SECTOR SEARCH\nFor EACH sector of EACH image, perform this analysis:\n\nScan entire sector from left to right, top to bottom\nLook for ANY symbols, not just CE marks specifically:\n\nCircles with symbols\nText abbreviations (2-4 letters)\nRegulatory icons (recycling, waste bins, warnings)\nQuality marks or certification logos\nANY combination of the letters C and E in close proximity\n\n\nPay EXTRA attention to:\n\nBottom portions of packaging (most common CE mark location)\nAreas near \"MADE IN...\" text (CE marks often appear here)\nSpecification/compliance tables (often have CE mark nearby)\nAreas with clusters of small symbols (CE mark often grouped with other regulatory marks)\nWhite or light-colored backgrounds (CE marks show up clearly here)\nNear barcode areas (regulatory information commonly placed here)\n\n\nDocument your search:\n\n✓ Sector 1: Searched - Product photo area - No CE mark found\n✓ Sector 2: Searched - Header text - No CE mark found\n✓ Sector 3: Searched - Instruction diagram - No CE mark found\n⧗ Sector 4: SEARCHING NOW - Compliance section...\n\nPHASE 3: TARGETED CE MARK HUNTING\nAfter completing sector search, perform specialized searches focusing on high-probability areas:\nSearch Pattern A: Bottom-Up Scan\n\nStart at the absolute bottom of each image\nScan slowly upward, looking for CE marks\nCE marks are MOST COMMONLY found in the bottom 20% of packaging\n\nSearch Pattern B: Symbol Cluster Detection\n\nFind all areas with multiple small symbols grouped together\nExamine each symbol in the cluster carefully\nLook for: ♻️ recycling symbols, 🗑️ waste bin symbols, ⚠️ warnings\nCE marks are often within 2-5cm of these symbols\n\nSearch Pattern C: \"MADE IN\" Proximity Search\n\nLocate all instances of \"MADE IN [COUNTRY]\" text\nExamine area within 10cm radius around this text\nCE marks very frequently appear near manufacturing location\n\nSearch Pattern D: Specification Table Adjacent Search\n\nFind all tables with technical specifications\nExamine the area immediately below, to the right, and to the left of tables\nCE marks often placed near or within technical compliance sections\n\nSearch Pattern E: Text Block Scanning\n\nLook at ALL blocks of small text\nCE marks can appear inline with text or in margins\nDon't skip fine print areas\n\n\nPHASE 4: CE MARK IDENTIFICATION CRITERIA\nWhen you spot a potential CE mark, verify it matches these characteristics:\nVisual Identification:\n\n✓ Two letters: \"C\" and \"E\"\n✓ Letters are touching or very close together (distinctive ligature)\n✓ Usually black or dark colored on light background (or white/light on dark)\n✓ Simple, clean design (not decorative or stylized)\n✓ Proportions: The \"C\" and \"E\" should have similar height, with \"E\" slightly narrower\n\nSize Considerations:\n\nCE marks can range from very small (3-5mm) to large (20-30mm+)\nDO NOT dismiss marks because they appear large\nLarge CE marks are completely legitimate and common on packaging\nSmall CE marks are typical on the product itself\nMedium to large CE marks are typical on packaging and documentation\n\nContext Clues:\n\n✓ Near other regulatory symbols (recycling, WEEE, RoHS)\n✓ Near text mentioning standards (EN, IEC, ISO numbers)\n✓ Near \"MADE IN CHINA\" or other manufacturing location text\n✓ In compliance/regulatory information sections\n✓ Near product specifications or technical data\n\nAuthentic vs Fake:\n\nAUTHENTIC CE: Letters properly spaced, correct proportions, in regulatory context\nFAKE \"China Export\": Letters too circular, identical sizing, decorative appearance\nWhen in doubt: Document it as a potential CE mark with your confidence level\n\n\nPHASE 5: MULTI-PASS VERIFICATION\nComplete these verification passes:\nPass 1: Initial Complete Search (document everything)\nPass 2: Bottom-third focus (re-examine bottom third of all images specifically for CE marks)\nPass 3: Symbol cluster verification (re-check all areas with grouped symbols)\nPass 4: Large symbol search (specifically look for LARGER marks you might have dismissed as decorative)\nPass 5: Edge and corner check (examine all edges and corners where marks might be partially visible)\nAfter each pass, update your search progress report.\n\nPHASE 6: CONTINUOUS PROGRESS REPORTING\nThroughout your analysis, maintain this format:\n═══════════════════════════════════════════════════\nSEARCH PROGRESS REPORT - [TIMESTAMP/PHASE]\n═══════════════════════════════════════════════════\n\nIMAGE 1: [Description]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCOMPLETED SEARCHES:\n  ✓ Sector 1 (Top-left): Product photo - NO CE MARK\n  ✓ Sector 2 (Top-center): Header text - NO CE MARK\n  ✓ Sector 3 (Top-right): Instructions - NO CE MARK\n  ✓ Sector 4 (Mid-left): Diagram area - NO CE MARK\n  ✓ Sector 5 (Center): Product photos - NO CE MARK\n  ✓ Sector 6 (Mid-right): Text block - NO CE MARK\n  ✓ Sector 7 (Bottom-left): Specifications - NO CE MARK\n  ✓ Sector 8 (Bottom-center): Table data - NO CE MARK\n  ⧗ Sector 9 (Bottom-right): SEARCHING - Compliance section...\n  \nREMAINING SEARCHES:\n  ☐ Sector 9 completion\n  ☐ Bottom-up verification pass\n  ☐ Symbol cluster re-check\n\nFINDINGS SO FAR:\n  • [List any potential marks found, even uncertain ones]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nIMAGE 2: [Not yet started]\n...\n\nPHASE 7: DETAILED DOCUMENTATION OF FINDINGS\nFor EVERY potential CE mark found (even uncertain ones):\n═══════════════════════════════════════════════════\nPOTENTIAL CE MARK DOCUMENTATION\n═══════════════════════════════════════════════════\n\nFINDING #[X]:\n\n📍 LOCATION:\n   • Image: [Number/Description]\n   • Sector: [Grid location]\n   • Specific position: [e.g., \"Bottom-right corner, 2cm from edge\"]\n   • Near: [Describe nearby elements - \"Next to MADE IN CHINA text\"]\n\n📏 SIZE:\n   • Estimated dimensions: [Small/Medium/Large, or approximate mm]\n   • Relative size: [Compared to nearby text or objects]\n\n🔍 VISUAL QUALITY:\n   • Sharpness: [Crystal clear / Sharp / Acceptable / Slightly blurry / Blurry / Very blurry]\n   • Visibility: [Fully visible / Mostly visible / Partially obscured / Heavily obscured]\n   • Contrast: [High / Medium / Low]\n   • Color: [Black/Dark on light / White/Light on dark / Other]\n\n✓ AUTHENTICITY INDICATORS:\n   • Letter formation: [Describe C and E shapes and spacing]\n   • Proportions: [Correct / Slightly off / Significantly off]\n   • Context: [Describe surrounding regulatory symbols/text]\n   • Typography: [Simple regulatory / Stylized / Decorative]\n\n📊 CONFIDENCE ASSESSMENT:\n   • Confidence this is a genuine CE mark: [0-100%]\n   • Classification: [DEFINITE / PROBABLE / POSSIBLE / UNLIKELY / NOT CE]\n   • Reasoning: [Explain your confidence level]\n\n📸 ADDITIONAL NOTES:\n   • [Any other relevant observations]\n\nPHASE 8: MANDATORY FINAL DETERMINATION\nYOU MUST PROVIDE THIS CONCLUSION - NO EXCEPTIONS\n═══════════════════════════════════════════════════\n              FINAL DETERMINATION\n═══════════════════════════════════════════════════\n\n🔎 SEARCH COMPLETION STATUS:\n   Total images analyzed: [X]\n   Total sectors searched: [X]\n   Search completion: [100% / or list incomplete areas]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n✓ **CE MARK STATUS: [PRESENT / NOT FOUND / UNCERTAIN]**\n\n[Choose ONE of the following sections:]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOPTION A: CE MARK PRESENT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n✅ **CONCLUSION: CE MARK CONFIRMED PRESENT**\n\n📍 CE MARK LOCATIONS FOUND:\n   1. [Image X, specific location, description]\n   2. [Image Y, specific location, description]\n   [List ALL CE marks found]\n\n🎯 PRIMARY/MOST CLEAR CE MARK:\n   • Location: [Most visible/clearest CE mark location]\n   • Description: [Brief description]\n   • Confidence: [Percentage]\n\n📋 SUPPORTING EVIDENCE:\n   • [Why you're confident this is a genuine CE mark]\n   • [Context clues: nearby symbols, text, placement]\n   • [Visual characteristics matching authentic CE marks]\n\n🔒 OVERALL CONFIDENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOR OPTION B: CE MARK NOT FOUND\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n❌ **CONCLUSION: NO CE MARK FOUND**\n\n🔍 SEARCH THOROUGHNESS:\n   • All [X] images completely searched\n   • All [X] sectors examined\n   • Multiple verification passes completed\n   • High-probability areas given extra attention\n\n📋 SEARCH DETAILS:\n   • Bottom sections: Thoroughly searched\n   • Symbol clusters: All examined\n   • \"MADE IN\" areas: Checked\n   • Specification tables: Reviewed\n   • Fine print: Scanned\n\n🔒 CONFIDENCE IN ABSENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOR OPTION C: UNCERTAIN\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n⚠️ **CONCLUSION: CE MARK STATUS UNCERTAIN**\n\n🤔 REASON FOR UNCERTAINTY:\n   [Explain specifically why you cannot confirm presence/absence]\n\n📍 POTENTIAL MARKS FOUND:\n   • [List locations of uncertain marks]\n   • [Explain why each is uncertain]\n\n💡 WHAT WOULD RESOLVE UNCERTAINTY:\n   • [Higher resolution image of specific area]\n   • [Different angle of product]\n   • [Close-up of specific section]\n   • [Additional documentation]\n\n🔒 CURRENT CONFIDENCE: [Percentage]%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📝 SUMMARY STATEMENT:\n[One clear sentence: \"This product DOES / DOES NOT / MAY OR MAY NOT display a CE marking based on the provided images.\"]\n\n═══════════════════════════════════════════════════\n\nCRITICAL REMINDERS\n⚠️ DO NOT:\n\nRush through any sector\nDismiss symbols because they look \"too large\" or \"too small\"\nSkip areas that seem unlikely\nAssume absence without thorough checking\nForget to provide a final conclusion\n\n✅ ALWAYS:\n\nSearch every visible area systematically\nReport on what you searched and what you found\nLook specifically for both small AND large CE marks\nCheck bottom sections and compliance areas multiple times\nProvide a clear, definitive final determination\nUse as many analysis credits as needed for thoroughness\n\n\nEXAMPLE OF EXPECTED OUTPUT LENGTH AND DETAIL\nYour complete analysis should be thorough and include:\n\n200-500+ words of search progress reporting\nDetailed grid-by-grid documentation\nMultiple verification passes documented\nComplete finding documentation for any marks\nComprehensive final determination section\n\nMinimum expected output: 500-1000 words of detailed analysis",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        256,
+        1408
+      ],
+      "id": "2da5814f-d760-4efb-8352-56c5b8d96703",
+      "name": "Analyze image3",
+      "credentials": {
+        "openAiApi": {
+          "id": "AjozSMgjq7KWxR3p",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "tijmen@ai-kip.com",
+        "subject": "Product flagged!",
+        "message": "This product has been flagged",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1456,
+        1248
+      ],
+      "id": "f987277a-7844-488a-a48c-fd266a27aa12",
+      "name": "Send a message1",
+      "webhookId": "b3a1ce62-1058-4d35-bfd4-3a27b0c514c0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "sPTrgmEulWvOZeb7",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1840,
+        1376
+      ],
+      "id": "fe95a34a-5869-4be2-a935-4ba513fc3645",
+      "name": "Append row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9lQ4MrlK0mYHFt2u",
+          "name": "Google Sheets account 5"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2000,
+        1168
+      ],
+      "id": "901f1ebb-4763-46c1-8cad-8032766f3277",
+      "name": "Append row in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9lQ4MrlK0mYHFt2u",
+          "name": "Google Sheets account 5"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qbvYRv7X-zmPOomUr56hSYfKfVHLYCUkzPRy_P4E3g8",
+          "mode": "list",
+          "cachedResultName": "Alpine",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbvYRv7X-zmPOomUr56hSYfKfVHLYCUkzPRy_P4E3g8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbvYRv7X-zmPOomUr56hSYfKfVHLYCUkzPRy_P4E3g8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "violation detected?": "={{ $json.output.violations_detected }}",
+            "violationScore": "={{ $json.output.violation_score }}",
+            "asinCode": "={{ $('Loop Over Items').item.json.asin }}",
+            "salesVolume": "={{ $('Loop Over Items').item.json.salesVolume }}",
+            "rating": "={{ $('Loop Over Items').item.json.productRating }}",
+            "searchKeyword": "={{ $('Loop Over Items').item.json.keyword }}",
+            "domainCode": "={{ $('Loop Over Items').item.json.domainCode }}",
+            "searchPosition": "={{ $('Loop Over Items').item.json.searchResultPosition }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asinCode",
+              "displayName": "asinCode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "domainCode",
+              "displayName": "domainCode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "searchKeyword",
+              "displayName": "searchKeyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rating",
+              "displayName": "rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "salesVolume",
+              "displayName": "salesVolume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "searchPosition",
+              "displayName": "searchPosition",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "violation detected?",
+              "displayName": "violation detected?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "violationScore",
+              "displayName": "violationScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1104,
+        1584
+      ],
+      "id": "795db47c-417e-45a5-af4b-184c88561201",
+      "name": "Append row in sheet5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9lQ4MrlK0mYHFt2u",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2d0f3e59-c3f3-477f-8ae2-670f848736d8",
+              "leftValue": "={{ $json.body.keyword }}",
+              "rightValue": "https://",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1232,
+        800
+      ],
+      "id": "f03a988d-09b7-4c42-b3f3-a9b4ba2ac2b0",
+      "name": "If4"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        992
+      ],
+      "id": "be63b738-f4cb-4b22-bc19-f265edf4f742",
+      "name": "No Operation, do nothing4"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "tijmen@ai-kip.com",
+        "subject": "Product flagged!",
+        "message": "This product has been flagged",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1728,
+        528
+      ],
+      "id": "9e5a50a2-8ee2-494e-8e64-7bafd6878ed5",
+      "name": "Send message and wait for response",
+      "webhookId": "b3a1ce62-1058-4d35-bfd4-3a27b0c514c0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "sPTrgmEulWvOZeb7",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2000,
+        816
+      ],
+      "id": "4a61e032-8520-48e7-a1d8-5c78ee394a7f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1584,
+        864
+      ],
+      "id": "823c4305-2598-4cf4-8349-3cc05337092e",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Compare Datasets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Product info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product info": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seller scrape": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Analyze image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Email amazon",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        []
+      ]
+    },
+    "Email amazon": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        []
+      ]
+    },
+    "Analyze image1": {
+      "main": [
+        [
+          {
+            "node": "Seller scrape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        []
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Compare Datasets",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Compare Datasets": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Product info2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product info2": {
+      "main": [
+        [
+          {
+            "node": "Analyze image2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seller scrape1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Analyze image3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Email amazon1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email amazon1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image3": {
+      "main": [
+        [
+          {
+            "node": "Seller scrape1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet3": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet4": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c150bde7-9e3b-4866-88f4-e467e46a014c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dab9da269de7e46e4206926628d955fc373642c44546f846e3e14fbfd739287c"
+  },
+  "id": "aWlQFvNcZwhb01Rz",
+  "tags": [
+    {
+      "updatedAt": "2025-11-28T13:31:57.045Z",
+      "createdAt": "2025-11-28T13:31:57.045Z",
+      "id": "2dwx9vJmUgzPzWkB",
+      "name": "Amazon Integration"
+    },
+    {
+      "updatedAt": "2025-11-28T13:31:57.023Z",
+      "createdAt": "2025-11-28T13:31:57.023Z",
+      "id": "T4BSV3fewfCzenrp",
+      "name": "Full Automation"
+    },
+    {
+      "updatedAt": "2025-11-28T13:23:43.764Z",
+      "createdAt": "2025-11-28T13:23:43.764Z",
+      "id": "VCY1YMgsQRnkaRGY",
+      "name": "Compliance"
+    }
+  ]
+}

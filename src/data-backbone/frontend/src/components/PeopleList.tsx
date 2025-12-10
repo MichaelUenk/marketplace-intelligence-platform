@@ -89,9 +89,9 @@ const DEMO_PEOPLE: Record<string, PersonRecord[]> = {
       emails: ['sophie.mulder@innovatetech.nl'],
     },
     {
-      person: { id: 'p10', full_name: 'Daan Bos', title: 'Head of Digital Marketing', department: 'Marketing' },
+      person: { id: 'p10', full_name: 'Amanda Berg', title: 'Head of Digital Marketing', department: 'Marketing' },
       companies: [{ id: 'c1', name: 'TechFlow BV', domain: 'techflow.nl', industry: 'SaaS' }],
-      emails: ['daan.bos@techflow.nl'],
+      emails: ['amanda.berg@techflow.nl'],
     },
   ],
   'Product': [

@@ -21,7 +21,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   onMenuClick,
-  user = { name: 'Daan', email: 'daan@ibood.com' },
+  user = { name: 'Amanda', email: 'amanda@alpine-hearing.com' },
 }) => {
   const { t } = useTranslation('common');
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
               </defs>
             </svg>
           </span>
-          <span className="logo-text">iBood</span>
+          <span className="logo-text">Alpine</span>
         </div>
       </div>
 

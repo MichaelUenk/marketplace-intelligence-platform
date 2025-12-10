@@ -12,7 +12,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir uv
 
 # Copy metadata *and* README first so build backends can read them
-COPY pyproject.toml uv.lock README.md ./
+COPY pyproject.toml README.md ./
 
 # Copy the source now so uv can install the project (src layout)
 COPY src/ ./src/
@@ -20,9 +20,9 @@ COPY src/ ./src/
 # Make the venv commands available on PATH
 ENV PATH="/app/.venv/bin:${PATH}"
 
-# Install deps + project (from lock) with the API extra
-# --frozen ensures we respect uv.lock during builds
-RUN uv sync --frozen --extra api
+# Install deps + project with the API extra
+# Regenerate lock file to match renamed project
+RUN uv lock && uv sync --extra api
 
 EXPOSE 8000
 CMD ["uvicorn", "atlas.services.query_api.main:app", "--host", "0.0.0.0", "--port", "8000"]

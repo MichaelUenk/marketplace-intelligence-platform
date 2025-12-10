@@ -749,7 +749,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="dashboard-header">
         <div className="header-greeting">
-          <h1>Good morning, Daan</h1>
+          <h1>Good morning, Amanda</h1>
           <p className="subtitle">Here's your pipeline overview for today</p>
         </div>
         <div className="header-metrics">

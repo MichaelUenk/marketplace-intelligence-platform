@@ -49,8 +49,10 @@ from atlas.services.query_api.deps import embedder, neo4j_session, qdrant_client
 from atlas.api.routers.connectors import router as connectors_router
 # Import signals intelligence router
 from atlas.api.routers.signals_intelligence import router as signals_router
+# Import compliance router
+from atlas.api.routers.compliance import router as compliance_router
 
-app = FastAPI(title="Graph Query API", version="0.4.0")  # bumped for signals intelligence
+app = FastAPI(title="Marketplace Intelligence API", version="0.5.0")  # bumped for compliance agent
 
 # Add CORS middleware
 app.add_middleware(
@@ -64,6 +66,7 @@ app.add_middleware(
 # Include routers
 app.include_router(connectors_router)
 app.include_router(signals_router)
+app.include_router(compliance_router)
 
 QDRANT_COLLECTION = "atlas_entities"
 

@@ -40,7 +40,7 @@ const DEMO_COMPANIES: Record<string, CompanyDetails> = {
     people: [
       { id: 'p1', full_name: 'Jan de Vries', title: 'CTO', department: 'Engineering' },
       { id: 'p6', full_name: 'Emma de Groot', title: 'VP Sales', department: 'Sales' },
-      { id: 'p10', full_name: 'Daan Bos', title: 'Head of Digital Marketing', department: 'Marketing' },
+      { id: 'p10', full_name: 'Amanda Berg', title: 'Head of Digital Marketing', department: 'Marketing' },
       { id: 'p13', full_name: 'Maaike de Jong', title: 'CFO', department: 'Finance' },
       { id: 'p18', full_name: 'Julia Vermeer', title: 'Customer Success Manager', department: 'Customer Success' },
     ],

@@ -20,7 +20,7 @@ from neo4j import Session
 from qdrant_client import QdrantClient
 from qdrant_client.models import FieldCondition, Filter, MatchValue
 
-app = FastAPI(title="Graph Query API", version="0.6.0")  # bumped for intent analysis
+app = FastAPI(title="Marketplace Intelligence API", version="0.7.0")  # bumped for compliance agent
 
 # Add CORS middleware
 app.add_middleware(
@@ -38,12 +38,14 @@ from atlas.api.routers.data import router as data_router
 from atlas.api.routers.signals_intelligence import router as signals_router
 from atlas.api.routers.intent_analysis import router as intent_router
 from atlas.api.routers.deep_work import router as deep_work_router
+from atlas.api.routers.compliance import router as compliance_router
 app.include_router(connectors_router)
 app.include_router(thought_leadership_router)
 app.include_router(data_router)
 app.include_router(signals_router)
 app.include_router(intent_router)
 app.include_router(deep_work_router)
+app.include_router(compliance_router)
 
 QDRANT_COLLECTION = "atlas_entities"
 

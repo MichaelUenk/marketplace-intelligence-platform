@@ -751,9 +751,124 @@ class ApiClient {
     if (entity_type) searchParams.append('entity_type', entity_type);
     return this.fetch(`/api/search?${searchParams.toString()}`);
   }
+
+  // ============================================================================
+  // COMPLIANCE ENDPOINTS
+  // ============================================================================
+
+  async initiateComplianceCheck(params: {
+    mode: 'keyword' | 'url';
+    keyword?: string;
+    url?: string;
+    marketplace: string;
+    max_pages?: number;
+  }): Promise<{ status: string; message: string; payload: Record<string, unknown> }> {
+    return this.fetch('/compliance/check', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+  }
+
+  async getComplianceResults(params?: {
+    marketplace?: string;
+    risk_level?: 'low' | 'medium' | 'high';
+    min_score?: number;
+    limit?: number;
+    offset?: number;
+  }): Promise<ComplianceResult[]> {
+    const searchParams = new URLSearchParams();
+    if (params?.marketplace) searchParams.append('marketplace', params.marketplace);
+    if (params?.risk_level) searchParams.append('risk_level', params.risk_level);
+    if (params?.min_score) searchParams.append('min_score', params.min_score.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.offset) searchParams.append('offset', params.offset.toString());
+    const query = searchParams.toString();
+    return this.fetch(`/compliance/results${query ? '?' + query : ''}`);
+  }
+
+  async getComplianceResult(checkId: string): Promise<ComplianceResult> {
+    return this.fetch(`/compliance/results/${encodeURIComponent(checkId)}`);
+  }
+
+  async getComplianceStats(params?: {
+    marketplace?: string;
+    days?: number;
+  }): Promise<ComplianceStats> {
+    const searchParams = new URLSearchParams();
+    if (params?.marketplace) searchParams.append('marketplace', params.marketplace);
+    if (params?.days) searchParams.append('days', params.days.toString());
+    const query = searchParams.toString();
+    return this.fetch(`/compliance/stats${query ? '?' + query : ''}`);
+  }
+}
+
+// Compliance types
+export interface ComplianceResult {
+  check_id: string;
+  asin: string;
+  url: string;
+  title: string;
+  marketplace: string;
+  violations_detected: boolean;
+  ce_certification_claimed: boolean;
+  is_baby_product: boolean;
+  product_age_range?: string;
+  ce_mark_visible: boolean;
+  violation_types: string[];
+  violation_details: ViolationDetail[];
+  seller_information: SellerInfo;
+  confidence_score: number;
+  violation_score: number;
+  violation_score_breakdown: ViolationScoreBreakdown;
+  reasoning: string;
+  recommended_action: string;
+  summary: string;
+  risk_level: 'low' | 'medium' | 'high';
+  fulfilled_by: string;
+  checked_at: string;
+  images_analyzed: number;
+}
+
+export interface ViolationDetail {
+  type: string;
+  evidence_text: string;
+  evidence_text_translated: string;
+  location: string;
+  severity: string;
+  explanation: string;
+  regulatory_reference?: string;
+}
+
+export interface SellerInfo {
+  seller_name: string;
+  seller_id?: string;
+  seller_website?: string;
+  website_search_confidence: string;
+  alternative_urls: string[];
+  search_notes?: string;
+}
+
+export interface ViolationScoreBreakdown {
+  base_score: number;
+  baby_product_ce_penalty: number;
+  severity_breakdown: Record<string, number>;
+  multipliers_applied: string[];
+  final_calculation: string;
+}
+
+export interface ComplianceStats {
+  total_checks: number;
+  total_products: number;
+  total_violations: number;
+  high_risk_count: number;
+  medium_risk_count: number;
+  low_risk_count: number;
+  clear_count: number;
+  avg_violation_score: number;
+  top_violation_types: Array<{ type: string; count: number }>;
 }
 
 export const api = new ApiClient();
 
 // Re-export types for convenience
-export type { Company, Employee, Deal, DealStage, OutreachSequence, HotAccount, ConnectorConfig };
+export type { Company, Employee, Deal, DealStage, OutreachSequence, HotAccount };
