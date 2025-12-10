@@ -1,0 +1,49 @@
+{
+  "title": "Leads",
+  "subtitle": "{{count}} new leads requiring attention.",
+  "addLead": "Add Lead",
+  "management": {
+    "title": "Lead Management",
+    "description": "Respond to leads within 4 hours for optimal conversion"
+  },
+  "stats": {
+    "totalLeads": "Total Leads",
+    "awaitingContact": "Awaiting Contact",
+    "overdue": "Overdue"
+  },
+  "filters": {
+    "noMatchingLeads": "No leads match your current filters.",
+    "responseTimeUrgency": "Response Time Urgency"
+  },
+  "urgency": {
+    "fourToTwo": "4h – 2h remaining",
+    "twoToOne": "2h – 1h remaining",
+    "underOne": "Under 1h remaining",
+    "overdue": "Overdue"
+  },
+  "actions": {
+    "actNow": "Act Now!",
+    "contactNow": "Contact Now",
+    "followUp": "Follow Up",
+    "convert": "Convert",
+    "view": "View",
+    "archive": "Archive",
+    "assign": "Assign",
+    "addNote": "Add Note"
+  },
+  "status": {
+    "new": "New",
+    "contacted": "Contacted",
+    "qualified": "Qualified",
+    "converted": "Converted",
+    "lost": "Lost"
+  },
+  "source": {
+    "website": "Website",
+    "referral": "Referral",
+    "linkedin": "LinkedIn",
+    "coldOutreach": "Cold Outreach",
+    "event": "Event",
+    "other": "Other"
+  }
+}

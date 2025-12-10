@@ -1,0 +1,65 @@
+{
+  "title": "Deals",
+  "subtitle": "{{count}} aktive Deals in deiner Pipeline.",
+  "addDeal": "Deal hinzufügen",
+  "viewDemoDeal": "Demo-Deal ansehen",
+  "backToDeals": "Zurück zu Deals",
+  "detail": {
+    "title": "Deal-Detail",
+    "edit": "Bearbeiten",
+    "dealValue": "Deal-Wert",
+    "stage": "Phase",
+    "meddpiccScore": "MEDDPICC Score",
+    "expectedClose": "Erwarteter Abschluss: {{date}}",
+    "daysInStage": "{{count}} Tag in Phase",
+    "daysInStage_other": "{{count}} Tage in Phase"
+  },
+  "tabs": {
+    "overview": "Übersicht",
+    "meddpicc": "MEDDPICC",
+    "contacts": "Kontakte",
+    "signals": "Signale",
+    "activity": "Aktivität"
+  },
+  "meddpicc": {
+    "title": "MEDDPICC Scorecard",
+    "metrics": "Metriken",
+    "metricsDesc": "Quantifizierbare Geschäftsergebnisse",
+    "economicBuyer": "Wirtschaftlicher Entscheider",
+    "economicBuyerDesc": "Person mit Budgetverantwortung",
+    "decisionCriteria": "Entscheidungskriterien",
+    "decisionCriteriaDesc": "Wie sie entscheiden werden",
+    "decisionProcess": "Entscheidungsprozess",
+    "decisionProcessDesc": "Schritte zur Entscheidung",
+    "paperProcess": "Papierprozess",
+    "paperProcessDesc": "Rechts-/Beschaffungsprozess",
+    "identifyPain": "Schmerz identifizieren",
+    "identifyPainDesc": "Zu lösendes Geschäftsproblem",
+    "champion": "Champion",
+    "championDesc": "Interner Fürsprecher",
+    "competition": "Wettbewerb",
+    "competitionDesc": "Wettbewerbslandschaft"
+  },
+  "buyingCommittee": {
+    "title": "Einkaufskomitee",
+    "champion": "Champion",
+    "economicBuyer": "Wirtschaftlicher Entscheider",
+    "evaluator": "Evaluator",
+    "influencer": "Beeinflusser",
+    "blocker": "Blocker"
+  },
+  "timeline": {
+    "title": "Deal-Zeitachse",
+    "lead": "Lead",
+    "mql": "MQL",
+    "sql": "SQL",
+    "sal": "SAL",
+    "commit": "Commit",
+    "close": "Abschluss"
+  },
+  "company": {
+    "industry": "Branche",
+    "location": "Standort",
+    "employees": "Mitarbeiter"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "pipeline": "Pipeline",
+    "leads": "Leads",
+    "deals": "Deals",
+    "contacts": "Kontakte",
+    "signals": "Signale",
+    "intent": "Absicht",
+    "sequences": "Sequenzen",
+    "thoughtLeadership": "Thought Leadership",
+    "deepWork": "Deep Work",
+    "intelligence": "Intelligenz",
+    "analytics": "Analyse",
+    "settings": "Einstellungen",
+    "help": "Hilfe & Support"
+  },
+  "actions": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "add": "Hinzufügen",
+    "search": "Suchen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "submit": "Absenden",
+    "reset": "Zurücksetzen",
+    "refresh": "Aktualisieren",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "filter": "Filter",
+    "sort": "Sortieren",
+    "view": "Ansehen",
+    "viewAll": "Alle ansehen"
+  },
+  "status": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "pending": "Ausstehend",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "completed": "Abgeschlossen",
+    "failed": "Fehlgeschlagen"
+  },
+  "auth": {
+    "accessRequired": "Zugang erforderlich",
+    "enterPassword": "Bitte geben Sie das Passwort ein, um fortzufahren",
+    "password": "Passwort",
+    "signIn": "Anmelden",
+    "signOut": "Abmelden",
+    "incorrectPassword": "Falsches Passwort"
+  },
+  "header": {
+    "searchPlaceholder": "Deals, Unternehmen, Kontakte suchen...",
+    "notifications": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "viewAllNotifications": "Alle Benachrichtigungen ansehen",
+    "profile": "Profil",
+    "preferences": "Einstellungen"
+  },
+  "sidebar": {
+    "skipToMainContent": "Zum Hauptinhalt springen",
+    "expandSidebar": "Seitenleiste erweitern",
+    "collapseSidebar": "Seitenleiste minimieren",
+    "mainNavigation": "Hauptnavigation"
+  },
+  "language": {
+    "title": "Sprache",
+    "select": "Sprache auswählen",
+    "english": "English",
+    "dutch": "Nederlands",
+    "german": "Deutsch"
+  },
+  "time": {
+    "minutesAgo": "vor {{count}} Minute",
+    "minutesAgo_other": "vor {{count}} Minuten",
+    "hoursAgo": "vor {{count}} Stunde",
+    "hoursAgo_other": "vor {{count}} Stunden",
+    "daysAgo": "vor {{count}} Tag",
+    "daysAgo_other": "vor {{count}} Tagen"
+  },
+  "validation": {
+    "required": "Dieses Feld ist erforderlich",
+    "invalidEmail": "Ungültige E-Mail-Adresse",
+    "minLength": "Mindestens {{count}} Zeichen erforderlich"
+  }
+}

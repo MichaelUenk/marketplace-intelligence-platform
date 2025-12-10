@@ -1,0 +1,168 @@
+{
+  "title": "Dashboard",
+  "greeting": "Goedemorgen, {{name}}. Hier is je pipeline overzicht.",
+  "pipelineTitle": "Pipeline",
+  "pipelineSubtitle": "Beheer je sales pipeline en volg de voortgang van deals.",
+  "searchCompanies": {
+    "title": "Zoek Bedrijven",
+    "placeholder": "bijv. 'HR bedrijven in Amsterdam' of 'tech bedrijven in Rotterdam'",
+    "googlePlaces": "Google Places",
+    "hunterIo": "Hunter.io (verrijk met contactpersonen)",
+    "limit": "Limiet",
+    "loadCompanies": "Bedrijven laden",
+    "loading": "Laden...",
+    "pleaseEnterQuery": "Voer een zoekopdracht in",
+    "loaded": "Geladen! Batch: {{batchId}}",
+    "error": "Fout: {{message}}"
+  },
+  "analytics": {
+    "title": "Analyse",
+    "subtitle": "Meet prestaties en volg belangrijke statistieken.",
+    "totalCompanies": "Totaal Bedrijven",
+    "industries": "Industrieën",
+    "topIndustry": "Top Industrie",
+    "topIndustries": "Top Industrieën",
+    "noDataAvailable": "Geen gegevens beschikbaar",
+    "company": "bedrijf",
+    "company_other": "bedrijven",
+    "unclassified": "Niet geclassificeerd"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "subtitle": "Configureer je account en voorkeuren.",
+    "apiStatus": "API Status",
+    "search": "Zoeken",
+    "language": "Taal",
+    "languageDescription": "Selecteer je voorkeurstaal voor de interface.",
+    "appearance": "Weergave",
+    "darkMode": "Donkere modus",
+    "integrations": "Integraties",
+    "integrationsDescription": "Verbind je databronnen en beheer API-inloggegevens."
+  },
+  "integrations": {
+    "title": "Integraties",
+    "subtitle": "Verbind databronnen en beheer API-inloggegevens",
+    "available": "Beschikbaar",
+    "connected": "Verbonden",
+    "notConnected": "Niet verbonden",
+    "error": "Fout",
+    "loading": "Integraties laden...",
+    "configure": "Configureren",
+    "connect": "Verbinden",
+    "disconnect": "Ontkoppelen",
+    "test": "Test",
+    "testConnection": "Test verbinding",
+    "saveCredentials": "Inloggegevens opslaan",
+    "enable": "Inschakelen",
+    "docs": "Documentatie",
+    "apiUsage": "API gebruik",
+    "remaining": "{{remaining}} / {{total}} resterend",
+    "rateLimit": "{{limit}}/{{window}}s rate limit",
+    "capabilities": {
+      "search": "Zoeken",
+      "enrich": "Verrijken",
+      "people": "Personen",
+      "webhooks": "Webhooks"
+    },
+    "types": {
+      "company": "Bedrijfsgegevensbronnen",
+      "people": "Personen & E-mail bronnen",
+      "scraper": "Web scraping & LinkedIn",
+      "file": "Bestand importeren"
+    },
+    "fields": {
+      "api_key": "API-sleutel",
+      "api_token": "API-token",
+      "apify_token": "Apify-token",
+      "li_at_cookie": "LinkedIn-cookie (li_at)"
+    },
+    "messages": {
+      "connectionSuccess": "Verbinding geslaagd",
+      "connectionFailed": "Ongeldige inloggegevens of verbinding mislukt",
+      "testFailed": "Verbindingstest mislukt",
+      "saveFailed": "Opslaan mislukt",
+      "noAuthRequired": "Geen authenticatie vereist",
+      "useDirectly": "Je kunt het direct gebruiken om bestanden te importeren."
+    }
+  },
+  "help": {
+    "title": "Help & Ondersteuning",
+    "subtitle": "Krijg hulp bij het gebruik van iBood.",
+    "documentation": "Documentatie",
+    "contactSupport": "Neem contact op met support via support@ibood.com"
+  },
+  "bowtie": {
+    "title": "Sales Intelligence Platform",
+    "bowtieView": "Bowtie Weergave",
+    "filters": "Filters",
+    "acquisition": "ACQUISITIE",
+    "activation": "ACTIVATIE",
+    "expansion": "UITBREIDING",
+    "accountsInPipeline": "accounts in pipeline",
+    "newCommitments": "nieuwe toezeggingen deze periode",
+    "activeCustomers": "actieve klanten",
+    "healthy": "Gezond",
+    "atRisk": "Risico",
+    "stalled": "Vastgelopen",
+    "avgDays": "Gem: {{days}} dagen"
+  },
+  "healthStatus": {
+    "title": "API Status",
+    "healthy": "Gezond",
+    "unhealthy": "Ongezond",
+    "checking": "Controleren..."
+  },
+  "thoughtLeadership": {
+    "subtitle": "AI-gestuurde vergadervoorbereiding, inzichten en kennisbeheer",
+    "upcomingMeetings": "Aankomende Vergaderingen",
+    "meetingPrep": "Vergadervoorbereiding",
+    "knowledgeBase": "Kennisbank",
+    "autoResponses": "Automatische Antwoorden",
+    "contentLibrary": "Inhoudsbibliotheek",
+    "meetings": {
+      "today": "Vandaag",
+      "tomorrow": "Morgen",
+      "thisWeek": "Deze Week",
+      "prepReady": "Voorbereiding Klaar",
+      "prepPending": "Voorbereiding Lopend",
+      "viewBrief": "Bekijk Briefing",
+      "generateBrief": "Genereer Briefing",
+      "viewPresentation": "Bekijk Presentatie",
+      "viewMeetingPlan": "Bekijk Vergaderplan"
+    },
+    "knowledge": {
+      "searchPlaceholder": "Zoek transcripties, inzichten en content...",
+      "transcriptsIndexed": "Transcripties Geïndexeerd",
+      "insightsExtracted": "Inzichten Geëxtraheerd",
+      "articlesGenerated": "Artikelen Gegenereerd",
+      "recentInsights": "Recente Inzichten",
+      "topTopics": "Toponderwerpen",
+      "painPoint": "Pijnpunt",
+      "buyingSignal": "Koopsignaal",
+      "objection": "Bezwaar",
+      "competitorMention": "Concurrent Vermelding"
+    },
+    "responses": {
+      "pendingReview": "Wachtend op Review",
+      "autoSent": "Automatisch Verzonden",
+      "drafts": "Concepten",
+      "confidenceScore": "Betrouwbaarheidsscore",
+      "approve": "Goedkeuren",
+      "edit": "Bewerken",
+      "escalate": "Escaleren"
+    },
+    "calendar": {
+      "connectCalendar": "Kalender Koppelen",
+      "googleCalendar": "Google Agenda",
+      "outlookCalendar": "Outlook Agenda",
+      "syncNow": "Nu Synchroniseren",
+      "lastSync": "Laatst gesynchroniseerd {{time}}"
+    },
+    "metrics": {
+      "prepCompletion": "Voorbereiding Voltooid",
+      "followUpRate": "Follow-up Percentage",
+      "responseAccuracy": "Antwoord Nauwkeurigheid",
+      "knowledgeCoverage": "Kennisdekking"
+    }
+  }
+}

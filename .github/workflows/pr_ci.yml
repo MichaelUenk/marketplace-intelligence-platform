@@ -1,0 +1,40 @@
+name: Ruff CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [ "**" ]
+  push:
+    branches: [ "main" ]
+
+concurrency:
+  group: ruff-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ruff:
+    name: Ruff format & lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Setup Python
+        run: uv python install 3.11
+
+      - name: Ruff format (check only)
+        run: |
+          uvx ruff format --check src
+          # If you also want to enforce formatting in other dirs, add them:
+          # uvx ruff format --check src tests tools
+
+      - name: Ruff lint
+        run: |
+          # First attempt safe fixes to reduce noise
+          uvx ruff check . --fix
+          # Then fail if anything still outstanding
+          uvx ruff check .

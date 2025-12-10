@@ -1,0 +1,219 @@
+name: Scheduled Implementation
+
+on:
+  # Run every night at 02:30 CET (01:30 UTC in winter, 00:30 UTC in summer)
+  schedule:
+    - cron: '30 1 * * *'  # 01:30 UTC = 02:30 CET
+
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'Implementation phase to run (1-6, or "all")'
+        required: false
+        default: 'next'
+        type: choice
+        options:
+          - next
+          - '1'
+          - '2'
+          - '3'
+          - '4'
+          - '5'
+          - '6'
+      dry_run:
+        description: 'Dry run (plan only, no changes)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+  LEMLIST_API_KEY: ${{ secrets.LEMLIST_API_KEY }}
+
+jobs:
+  implement:
+    name: Run Implementation Phase
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install Claude Code CLI
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude --version
+
+      - name: Determine current phase
+        id: phase
+        run: |
+          if [ -f ".current-implementation-phase" ]; then
+            CURRENT_PHASE=$(cat .current-implementation-phase)
+          else
+            CURRENT_PHASE="1"
+          fi
+
+          # Override with manual input if provided
+          if [ "${{ github.event.inputs.phase }}" != "next" ] && [ "${{ github.event.inputs.phase }}" != "" ]; then
+            CURRENT_PHASE="${{ github.event.inputs.phase }}"
+          fi
+
+          echo "phase=$CURRENT_PHASE" >> $GITHUB_OUTPUT
+          echo "Current implementation phase: $CURRENT_PHASE"
+
+      - name: Phase 1 - Email Execution Engine
+        if: steps.phase.outputs.phase == '1'
+        run: |
+          echo "Implementing Phase 1: Email Execution Engine with European tools"
+
+          # Add n8n to docker-compose
+          claude -p "Add n8n service to docker-compose.yml for workflow automation. Use the configuration from IMPLEMENTATION_PLAN.md." \
+            --allowedTools "Read,Edit,Write" \
+            --print \
+            --max-turns 5
+
+          # Create LemlistConnector
+          claude -p "Create LemlistConnector in /src/atlas/connectors/lemlist/ following the existing connector pattern. Include campaign CRUD, lead management, and webhook handling for the French email platform lemlist." \
+            --allowedTools "Read,Edit,Write,Glob,Grep" \
+            --print \
+            --max-turns 10
+
+          # Create Mistral AI client
+          claude -p "Create Mistral AI client in /src/atlas/services/ai_agent/ for the French AI provider. Include research_agent.py and personalization_agent.py." \
+            --allowedTools "Read,Edit,Write,Glob,Grep" \
+            --print \
+            --max-turns 10
+
+          # Update phase tracker
+          echo "2" > .current-implementation-phase
+
+      - name: Phase 2 - AI Sales Agent
+        if: steps.phase.outputs.phase == '2'
+        run: |
+          echo "Implementing Phase 2: AI Sales Agent with Mistral"
+
+          claude -p "Complete AI Sales Agent implementation: Add email personalization pipeline, subject line generator with A/B variants, and smart recommendations using Mistral AI. Follow IMPLEMENTATION_PLAN.md Phase 2." \
+            --allowedTools "Read,Edit,Write,Glob,Grep" \
+            --print \
+            --max-turns 15
+
+          echo "3" > .current-implementation-phase
+
+      - name: Phase 3 - CRM Sync
+        if: steps.phase.outputs.phase == '3'
+        run: |
+          echo "Implementing Phase 3: CRM Bidirectional Sync with n8n"
+
+          claude -p "Implement CRM sync: Create n8n workflow templates for Salesforce and HubSpot sync. Add sync status API endpoints and frontend dashboard. Follow IMPLEMENTATION_PLAN.md Phase 3." \
+            --allowedTools "Read,Edit,Write,Glob,Grep" \
+            --print \
+            --max-turns 15
+
+          echo "4" > .current-implementation-phase
+
+      - name: Phase 4 - Call Dialer
+        if: steps.phase.outputs.phase == '4'
+        run: |
+          echo "Implementing Phase 4: Call Dialer with Aircall + Gladia"
+
+          claude -p "Implement call dialer: Create AircallConnector for the French VoIP provider, integrate Gladia for French transcription service. Add click-to-call and call logging. Follow IMPLEMENTATION_PLAN.md Phase 4." \
+            --allowedTools "Read,Edit,Write,Glob,Grep" \
+            --print \
+            --max-turns 15
+
+          echo "5" > .current-implementation-phase
+
+      - name: Phase 5 - Revenue Forecasting
+        if: steps.phase.outputs.phase == '5'
+        run: |
+          echo "Implementing Phase 5: Revenue Forecasting"
+
+          claude -p "Implement revenue forecasting: Create ForecastingService with signal aggregation, build prediction model with XGBoost, add forecasting dashboard. Use Mistral for explanations. Follow IMPLEMENTATION_PLAN.md Phase 5." \
+            --allowedTools "Read,Edit,Write,Glob,Grep" \
+            --print \
+            --max-turns 15
+
+          echo "6" > .current-implementation-phase
+
+      - name: Phase 6 - Meeting Scheduler
+        if: steps.phase.outputs.phase == '6'
+        run: |
+          echo "Implementing Phase 6: Meeting Scheduler with Zeeg/Cal.com"
+
+          claude -p "Implement meeting scheduler: Integrate German Zeeg or self-hosted Cal.com for scheduling. Add meeting intelligence with Mistral. Follow IMPLEMENTATION_PLAN.md Phase 6." \
+            --allowedTools "Read,Edit,Write,Glob,Grep" \
+            --print \
+            --max-turns 15
+
+          echo "complete" > .current-implementation-phase
+
+      - name: Commit changes
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add -A
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            PHASE="${{ steps.phase.outputs.phase }}"
+            git commit -m "feat: Implement Phase $PHASE from European implementation plan
+
+            Automated implementation using Claude Code.
+            See IMPLEMENTATION_PLAN.md for details.
+
+            🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+            Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+
+            git push
+          fi
+
+      - name: Create implementation summary
+        run: |
+          echo "## Implementation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Phase:** ${{ steps.phase.outputs.phase }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** Completed" >> $GITHUB_STEP_SUMMARY
+          echo "**Dry Run:** ${{ github.event.inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### European Vendors Used" >> $GITHUB_STEP_SUMMARY
+          echo "- 🇫🇷 lemlist (Email)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🇫🇷 Mistral AI (LLM)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🇫🇷 Aircall (Calls)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🇫🇷 Gladia (Transcription)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🇩🇪 n8n (Workflows)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🇩🇪 Zeeg (Scheduling)" >> $GITHUB_STEP_SUMMARY
+
+  notify:
+    name: Send Notification
+    needs: implement
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Notify on completion
+        run: |
+          echo "Implementation phase completed. Check the workflow summary for details."
+          # Add Slack/Discord/Email notification here if needed

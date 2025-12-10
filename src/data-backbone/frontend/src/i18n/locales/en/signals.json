@@ -1,0 +1,55 @@
+{
+  "title": "Signals Intelligence",
+  "subtitle": "Track buying signals and intent data across your accounts.",
+  "intentTitle": "Intent Analysis",
+  "intentSubtitle": "Deal Qualification, Buyer Intent & Risk Assessment",
+  "overview": {
+    "title": "Signal Overview",
+    "past30Days": "Past 30 days",
+    "signalTrend": "Signal Trend (30 days)",
+    "week1": "Week 1",
+    "week2": "Week 2",
+    "week3": "Week 3",
+    "week4": "Week 4",
+    "viewDetailedAnalytics": "View Detailed Analytics"
+  },
+  "configure": "Configure",
+  "categories": {
+    "title": "Signal Categories",
+    "directEngagement": "Direct Engagement",
+    "sustainability": "Sustainability",
+    "growthExpansion": "Growth & Expansion",
+    "workplaceExperience": "Workplace Experience",
+    "employeeWellbeing": "Employee Wellbeing"
+  },
+  "hotAccounts": {
+    "title": "Hot Accounts",
+    "description": "Accounts with high intent scores"
+  },
+  "recentSignals": {
+    "title": "Recent Signals",
+    "company": "Company",
+    "signal": "Signal",
+    "type": "Type",
+    "strength": "Strength",
+    "date": "Date"
+  },
+  "strength": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "types": {
+    "news": "News",
+    "hiring": "Hiring",
+    "funding": "Funding",
+    "expansion": "Expansion",
+    "technology": "Technology",
+    "partnership": "Partnership"
+  },
+  "notifications": {
+    "hotStatus": "{{company}} reached Hot status",
+    "newSignal": "New signal: {{description}}",
+    "dealMoved": "Deal moved to {{stage}}: {{company}}"
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "dashboard": {
+    "title": "Intelligence & Deep Work",
+    "subtitle": "Collaborative learning environment for continuous AI improvement",
+    "tabs": {
+      "session": "Week Work Session",
+      "knowledge": "Knowledge Base",
+      "reasoning": "Reasoning Log",
+      "performance": "Performance"
+    },
+    "sessionStatus": {
+      "title": "Current Session",
+      "noActive": "No Active Session",
+      "startNew": "Start Week Work Session",
+      "phase": "Phase",
+      "decisionsReviewed": "{{reviewed}} of {{total}} decisions reviewed",
+      "patternsProposed": "{{count}} patterns proposed",
+      "actionsCreated": "{{count}} actions created"
+    }
+  },
+  "chat": {
+    "title": "AI Assistant",
+    "placeholder": "Ask about decisions, request analysis, or discuss patterns...",
+    "send": "Send",
+    "recording": "Recording...",
+    "startRecording": "Start voice input",
+    "stopRecording": "Stop recording",
+    "quickActions": {
+      "summarize": "Summarize flagged decisions",
+      "suggestPatterns": "Suggest new patterns",
+      "analyzeWeek": "Analyze this week's performance"
+    },
+    "errors": {
+      "sendFailed": "Failed to send message",
+      "transcribeFailed": "Failed to transcribe audio",
+      "microphoneAccess": "Microphone access required for voice input"
+    }
+  },
+  "session": {
+    "title": "Week Work Wednesday",
+    "subtitle": "Review AI decisions and validate learnings",
+    "noActive": "No active session",
+    "noActiveDescription": "Start a new Week Work session to review flagged AI decisions and improve the system's intelligence.",
+    "startSession": "Start Session",
+    "overview": {
+      "title": "Session Overview",
+      "totalDecisions": "Total Decisions",
+      "flaggedForReview": "Flagged for Review",
+      "reviewed": "Reviewed",
+      "patternsProposed": "Patterns Proposed"
+    },
+    "phases": {
+      "title": "Session Phases",
+      "review": "Review",
+      "pattern": "Pattern",
+      "outcome": "Outcome",
+      "planning": "Planning"
+    },
+    "flaggedDecisions": {
+      "title": "Flagged Decisions for Review",
+      "confidence": "Confidence",
+      "reasoning": "Reasoning Chain",
+      "actions": {
+        "validate": "Validate",
+        "correct": "Correct",
+        "reject": "Reject",
+        "discuss": "Discuss"
+      }
+    },
+    "patterns": {
+      "title": "Proposed Patterns",
+      "noPatterns": "No proposed patterns to review",
+      "activate": "Activate Pattern",
+      "reject": "Reject"
+    }
+  },
+  "knowledgeBase": {
+    "title": "Knowledge Base",
+    "subtitle": "Browse validated learnings and intelligence",
+    "search": "Search knowledge entries...",
+    "addEntry": "Add Entry",
+    "filters": {
+      "all": "All",
+      "signalRules": "Signal Rules",
+      "companyIntel": "Company Intel",
+      "patterns": "Patterns",
+      "negative": "Negative Learnings"
+    },
+    "entry": {
+      "type": "Type",
+      "accuracy": "Accuracy",
+      "retrievals": "Retrievals",
+      "created": "Created",
+      "source": "Source",
+      "edit": "Edit",
+      "viewDetails": "View Details",
+      "archive": "Archive"
+    },
+    "modal": {
+      "title": "Entry Details",
+      "content": "Content",
+      "statistics": "Statistics",
+      "metadata": "Metadata",
+      "close": "Close",
+      "edit": "Edit Entry"
+    },
+    "empty": {
+      "title": "No knowledge entries found",
+      "description": "Knowledge entries will appear here as the AI learns from validated decisions."
+    }
+  },
+  "reasoningLog": {
+    "title": "AI Reasoning Log",
+    "subtitle": "Full transparency into every AI decision",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "totalDecisions": "Total Decisions",
+    "validated": "Validated",
+    "corrected": "Corrected",
+    "accuracy": "Accuracy",
+    "noDecisions": "No decisions found",
+    "noDecisionsDescription": "AI decisions will appear here as the system processes signals and makes recommendations.",
+    "needsReview": "Needs Review",
+    "reasoning": "Reasoning Chain",
+    "reviewNotes": "Review Notes",
+    "viewFull": "View Full Details",
+    "reviewNow": "Review Now"
+  },
+  "performance": {
+    "title": "Performance Dashboard",
+    "subtitle": "Track AI improvement over time",
+    "last7Days": "7 Days",
+    "last30Days": "30 Days",
+    "last90Days": "90 Days",
+    "vsLastPeriod": "vs last period",
+    "thisMonth": "this month",
+    "classificationAccuracy": "Classification Accuracy",
+    "confidenceCalibration": "Confidence Calibration",
+    "dealPrediction": "Deal Prediction",
+    "knowledgeEntries": "Knowledge Entries",
+    "accuracyTrends": "Accuracy Trends Over Time",
+    "learningVelocity": "Learning Velocity",
+    "decisionsMade": "Decisions Made",
+    "flaggedForReview": "Flagged for Review",
+    "correctionsApplied": "Corrections Applied",
+    "newKnowledgeEntries": "New Knowledge Entries",
+    "patternRulesActivated": "Pattern Rules Activated",
+    "businessImpact": "Business Impact",
+    "signalToConversion": "Signal → Conversion",
+    "timeToContact": "Time to Contact",
+    "missedSignals": "Missed Signals",
+    "researchTime": "Research Time/Week",
+    "days": "days",
+    "hrs": "hrs",
+    "mo": "mo",
+    "hrsWeek": "hrs/week",
+    "decisionsByType": "Decisions by Type"
+  }
+}

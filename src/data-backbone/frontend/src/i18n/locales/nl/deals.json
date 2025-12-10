@@ -1,0 +1,65 @@
+{
+  "title": "Deals",
+  "subtitle": "{{count}} actieve deals in je pipeline.",
+  "addDeal": "Deal toevoegen",
+  "viewDemoDeal": "Demo Deal bekijken",
+  "backToDeals": "Terug naar Deals",
+  "detail": {
+    "title": "Deal Detail",
+    "edit": "Bewerken",
+    "dealValue": "Dealwaarde",
+    "stage": "Fase",
+    "meddpiccScore": "MEDDPICC Score",
+    "expectedClose": "Verwachte afsluiting: {{date}}",
+    "daysInStage": "{{count}} dag in fase",
+    "daysInStage_other": "{{count}} dagen in fase"
+  },
+  "tabs": {
+    "overview": "Overzicht",
+    "meddpicc": "MEDDPICC",
+    "contacts": "Contacten",
+    "signals": "Signalen",
+    "activity": "Activiteit"
+  },
+  "meddpicc": {
+    "title": "MEDDPICC Scorekaart",
+    "metrics": "Metrics",
+    "metricsDesc": "Kwantificeerbare bedrijfsresultaten",
+    "economicBuyer": "Economische Koper",
+    "economicBuyerDesc": "Persoon met budgetautoriteit",
+    "decisionCriteria": "Beslissingscriteria",
+    "decisionCriteriaDesc": "Hoe zij zullen beslissen",
+    "decisionProcess": "Beslissingsproces",
+    "decisionProcessDesc": "Stappen om te beslissen",
+    "paperProcess": "Papierwerk Proces",
+    "paperProcessDesc": "Juridisch/inkoopproces",
+    "identifyPain": "Identificeer Pijn",
+    "identifyPainDesc": "Zakelijk probleem om op te lossen",
+    "champion": "Kampioen",
+    "championDesc": "Interne voorstander",
+    "competition": "Concurrentie",
+    "competitionDesc": "Concurrentielandschap"
+  },
+  "buyingCommittee": {
+    "title": "Inkoopcommissie",
+    "champion": "Kampioen",
+    "economicBuyer": "Economische Koper",
+    "evaluator": "Evaluator",
+    "influencer": "Beïnvloeder",
+    "blocker": "Blokkeerder"
+  },
+  "timeline": {
+    "title": "Deal Tijdlijn",
+    "lead": "Lead",
+    "mql": "MQL",
+    "sql": "SQL",
+    "sal": "SAL",
+    "commit": "Toezegging",
+    "close": "Afsluiting"
+  },
+  "company": {
+    "industry": "Industrie",
+    "location": "Locatie",
+    "employees": "medewerkers"
+  }
+}

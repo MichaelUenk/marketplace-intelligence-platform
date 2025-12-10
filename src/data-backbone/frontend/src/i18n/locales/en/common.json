@@ -1,0 +1,92 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "pipeline": "Pipeline",
+    "leads": "Leads",
+    "deals": "Deals",
+    "contacts": "Contacts",
+    "signals": "Signals",
+    "intent": "Intent",
+    "sequences": "Sequences",
+    "thoughtLeadership": "Thought Leadership",
+    "deepWork": "Deep Work",
+    "intelligence": "Intelligence",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "help": "Help & Support"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "search": "Search",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "confirm": "Confirm",
+    "submit": "Submit",
+    "reset": "Reset",
+    "refresh": "Refresh",
+    "export": "Export",
+    "import": "Import",
+    "filter": "Filter",
+    "sort": "Sort",
+    "view": "View",
+    "viewAll": "View All"
+  },
+  "status": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "pending": "Pending",
+    "active": "Active",
+    "inactive": "Inactive",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "auth": {
+    "accessRequired": "Access Required",
+    "enterPassword": "Please enter the password to continue",
+    "password": "Password",
+    "signIn": "Sign In",
+    "signOut": "Sign out",
+    "incorrectPassword": "Incorrect password"
+  },
+  "header": {
+    "searchPlaceholder": "Search deals, companies, contacts...",
+    "notifications": "Notifications",
+    "markAllRead": "Mark all read",
+    "viewAllNotifications": "View all notifications",
+    "profile": "Profile",
+    "preferences": "Preferences"
+  },
+  "sidebar": {
+    "skipToMainContent": "Skip to main content",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "mainNavigation": "Main navigation"
+  },
+  "language": {
+    "title": "Language",
+    "select": "Select language",
+    "english": "English",
+    "dutch": "Nederlands",
+    "german": "Deutsch"
+  },
+  "time": {
+    "minutesAgo": "{{count}} minute ago",
+    "minutesAgo_other": "{{count}} minutes ago",
+    "hoursAgo": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "daysAgo": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "minLength": "Minimum {{count}} characters required"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "pipeline": "Pipeline",
+    "leads": "Leads",
+    "deals": "Deals",
+    "contacts": "Contacten",
+    "signals": "Signalen",
+    "intent": "Intentie",
+    "sequences": "Sequenties",
+    "thoughtLeadership": "Thought Leadership",
+    "deepWork": "Deep Work",
+    "intelligence": "Intelligentie",
+    "analytics": "Analyse",
+    "settings": "Instellingen",
+    "help": "Help & Ondersteuning"
+  },
+  "actions": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "add": "Toevoegen",
+    "search": "Zoeken",
+    "back": "Terug",
+    "next": "Volgende",
+    "previous": "Vorige",
+    "close": "Sluiten",
+    "confirm": "Bevestigen",
+    "submit": "Versturen",
+    "reset": "Resetten",
+    "refresh": "Vernieuwen",
+    "export": "Exporteren",
+    "import": "Importeren",
+    "filter": "Filter",
+    "sort": "Sorteren",
+    "view": "Bekijken",
+    "viewAll": "Alles bekijken"
+  },
+  "status": {
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Succes",
+    "pending": "In afwachting",
+    "active": "Actief",
+    "inactive": "Inactief",
+    "completed": "Voltooid",
+    "failed": "Mislukt"
+  },
+  "auth": {
+    "accessRequired": "Toegang vereist",
+    "enterPassword": "Voer het wachtwoord in om door te gaan",
+    "password": "Wachtwoord",
+    "signIn": "Inloggen",
+    "signOut": "Uitloggen",
+    "incorrectPassword": "Onjuist wachtwoord"
+  },
+  "header": {
+    "searchPlaceholder": "Zoek deals, bedrijven, contacten...",
+    "notifications": "Meldingen",
+    "markAllRead": "Alles als gelezen markeren",
+    "viewAllNotifications": "Alle meldingen bekijken",
+    "profile": "Profiel",
+    "preferences": "Voorkeuren"
+  },
+  "sidebar": {
+    "skipToMainContent": "Ga naar hoofdinhoud",
+    "expandSidebar": "Zijbalk uitvouwen",
+    "collapseSidebar": "Zijbalk samenvouwen",
+    "mainNavigation": "Hoofdnavigatie"
+  },
+  "language": {
+    "title": "Taal",
+    "select": "Selecteer taal",
+    "english": "English",
+    "dutch": "Nederlands",
+    "german": "Deutsch"
+  },
+  "time": {
+    "minutesAgo": "{{count}} minuut geleden",
+    "minutesAgo_other": "{{count}} minuten geleden",
+    "hoursAgo": "{{count}} uur geleden",
+    "hoursAgo_other": "{{count}} uur geleden",
+    "daysAgo": "{{count}} dag geleden",
+    "daysAgo_other": "{{count}} dagen geleden"
+  },
+  "validation": {
+    "required": "Dit veld is verplicht",
+    "invalidEmail": "Ongeldig e-mailadres",
+    "minLength": "Minimaal {{count}} tekens vereist"
+  }
+}

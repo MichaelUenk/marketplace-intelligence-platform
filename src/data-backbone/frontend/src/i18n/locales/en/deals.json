@@ -1,0 +1,65 @@
+{
+  "title": "Deals",
+  "subtitle": "{{count}} active deals in your pipeline.",
+  "addDeal": "Add Deal",
+  "viewDemoDeal": "View Demo Deal",
+  "backToDeals": "Back to Deals",
+  "detail": {
+    "title": "Deal Detail",
+    "edit": "Edit",
+    "dealValue": "Deal Value",
+    "stage": "Stage",
+    "meddpiccScore": "MEDDPICC Score",
+    "expectedClose": "Expected close: {{date}}",
+    "daysInStage": "{{count}} day in stage",
+    "daysInStage_other": "{{count}} days in stage"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "meddpicc": "MEDDPICC",
+    "contacts": "Contacts",
+    "signals": "Signals",
+    "activity": "Activity"
+  },
+  "meddpicc": {
+    "title": "MEDDPICC Scorecard",
+    "metrics": "Metrics",
+    "metricsDesc": "Quantifiable business outcomes",
+    "economicBuyer": "Economic Buyer",
+    "economicBuyerDesc": "Person with budget authority",
+    "decisionCriteria": "Decision Criteria",
+    "decisionCriteriaDesc": "How they will decide",
+    "decisionProcess": "Decision Process",
+    "decisionProcessDesc": "Steps to make decision",
+    "paperProcess": "Paper Process",
+    "paperProcessDesc": "Legal/procurement process",
+    "identifyPain": "Identify Pain",
+    "identifyPainDesc": "Business problem to solve",
+    "champion": "Champion",
+    "championDesc": "Internal advocate",
+    "competition": "Competition",
+    "competitionDesc": "Competitive landscape"
+  },
+  "buyingCommittee": {
+    "title": "Buying Committee",
+    "champion": "Champion",
+    "economicBuyer": "Economic Buyer",
+    "evaluator": "Evaluator",
+    "influencer": "Influencer",
+    "blocker": "Blocker"
+  },
+  "timeline": {
+    "title": "Deal Timeline",
+    "lead": "Lead",
+    "mql": "MQL",
+    "sql": "SQL",
+    "sal": "SAL",
+    "commit": "Commit",
+    "close": "Close"
+  },
+  "company": {
+    "industry": "Industry",
+    "location": "Location",
+    "employees": "employees"
+  }
+}

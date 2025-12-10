@@ -1,0 +1,186 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Overview of your sales pipeline and activity",
+  "greeting": "Good morning, {{name}}. Here's your pipeline overview.",
+  "pipelineTitle": "Pipeline",
+  "pipelineSubtitle": "Manage your sales pipeline and track deal progress.",
+  "metrics": {
+    "companies": "Companies",
+    "contacts": "Contacts",
+    "openDeals": "Open Deals",
+    "signals": "Unread Signals",
+    "meetings": "Meetings",
+    "wonDeals": "Won Deals"
+  },
+  "pipelineValue": "Pipeline Value",
+  "wonRevenue": "Won Revenue",
+  "weighted": "Weighted",
+  "dealsClosed": "deals closed",
+  "pipelineStages": "Pipeline Stages",
+  "deals": "deals",
+  "noPipelineData": "No pipeline data available",
+  "recentActivity": "Recent Activity",
+  "noActivity": "No recent activity",
+  "searchCompanies": {
+    "title": "Search Companies",
+    "placeholder": "e.g., 'HR companies in Austin' or 'tech companies in San Francisco'",
+    "googlePlaces": "Google Places",
+    "hunterIo": "Hunter.io (enrich with people)",
+    "limit": "Limit",
+    "loadCompanies": "Load Companies",
+    "loading": "Loading...",
+    "pleaseEnterQuery": "Please enter a search query",
+    "loaded": "Loaded! Batch: {{batchId}}",
+    "error": "Error: {{message}}"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Measure performance and track key metrics.",
+    "totalCompanies": "Total Companies",
+    "industries": "Industries",
+    "topIndustry": "Top Industry",
+    "topIndustries": "Top Industries",
+    "noDataAvailable": "No data available",
+    "company": "company",
+    "company_other": "companies",
+    "unclassified": "Unclassified"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your account and preferences.",
+    "apiStatus": "API Status",
+    "search": "Search",
+    "language": "Language",
+    "languageDescription": "Select your preferred language for the interface.",
+    "appearance": "Appearance",
+    "darkMode": "Dark Mode",
+    "integrations": "Integrations",
+    "integrationsDescription": "Connect your data sources and manage API credentials."
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Connect data sources and manage API credentials",
+    "available": "Available",
+    "connected": "Connected",
+    "notConnected": "Not Connected",
+    "error": "Error",
+    "loading": "Loading integrations...",
+    "configure": "Configure",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "test": "Test",
+    "testConnection": "Test Connection",
+    "saveCredentials": "Save Credentials",
+    "enable": "Enable",
+    "docs": "Docs",
+    "apiUsage": "API Usage",
+    "remaining": "{{remaining}} / {{total}} remaining",
+    "rateLimit": "{{limit}}/{{window}}s rate limit",
+    "capabilities": {
+      "search": "Search",
+      "enrich": "Enrich",
+      "people": "People",
+      "webhooks": "Webhooks"
+    },
+    "types": {
+      "company": "Company Data Sources",
+      "people": "People & Email Sources",
+      "scraper": "Web Scraping & LinkedIn",
+      "file": "File Import"
+    },
+    "fields": {
+      "api_key": "API Key",
+      "api_token": "API Token",
+      "apify_token": "Apify Token",
+      "li_at_cookie": "LinkedIn Cookie (li_at)"
+    },
+    "messages": {
+      "connectionSuccess": "Connection successful",
+      "connectionFailed": "Invalid credentials or connection failed",
+      "testFailed": "Connection test failed",
+      "saveFailed": "Save failed",
+      "noAuthRequired": "No authentication required",
+      "useDirectly": "You can use it directly to import files."
+    }
+  },
+  "help": {
+    "title": "Help & Support",
+    "subtitle": "Get help with using iBood.",
+    "documentation": "Documentation",
+    "contactSupport": "Contact support at support@ibood.com"
+  },
+  "bowtie": {
+    "title": "Sales Intelligence Platform",
+    "bowtieView": "Bowtie View",
+    "filters": "Filters",
+    "acquisition": "ACQUISITION",
+    "activation": "ACTIVATION",
+    "expansion": "EXPANSION",
+    "accountsInPipeline": "accounts in pipeline",
+    "newCommitments": "new commitments this period",
+    "activeCustomers": "active customers",
+    "healthy": "Healthy",
+    "atRisk": "At Risk",
+    "stalled": "Stalled",
+    "avgDays": "Avg: {{days}} days"
+  },
+  "healthStatus": {
+    "title": "API Status",
+    "healthy": "Healthy",
+    "unhealthy": "Unhealthy",
+    "checking": "Checking..."
+  },
+  "thoughtLeadership": {
+    "subtitle": "AI-powered meeting prep, insights, and knowledge management",
+    "upcomingMeetings": "Upcoming Meetings",
+    "meetingPrep": "Meeting Prep",
+    "knowledgeBase": "Knowledge Base",
+    "autoResponses": "Auto Responses",
+    "contentLibrary": "Content Library",
+    "meetings": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "thisWeek": "This Week",
+      "prepReady": "Prep Ready",
+      "prepPending": "Prep Pending",
+      "viewBrief": "View Brief",
+      "generateBrief": "Generate Brief",
+      "viewPresentation": "View Presentation",
+      "viewMeetingPlan": "View Meeting Plan"
+    },
+    "knowledge": {
+      "searchPlaceholder": "Search transcripts, insights, and content...",
+      "transcriptsIndexed": "Transcripts Indexed",
+      "insightsExtracted": "Insights Extracted",
+      "articlesGenerated": "Articles Generated",
+      "recentInsights": "Recent Insights",
+      "topTopics": "Top Topics",
+      "painPoint": "Pain Point",
+      "buyingSignal": "Buying Signal",
+      "objection": "Objection",
+      "competitorMention": "Competitor Mention"
+    },
+    "responses": {
+      "pendingReview": "Pending Review",
+      "autoSent": "Auto-sent",
+      "drafts": "Drafts",
+      "confidenceScore": "Confidence Score",
+      "approve": "Approve",
+      "edit": "Edit",
+      "escalate": "Escalate"
+    },
+    "calendar": {
+      "connectCalendar": "Connect Calendar",
+      "googleCalendar": "Google Calendar",
+      "outlookCalendar": "Outlook Calendar",
+      "syncNow": "Sync Now",
+      "lastSync": "Last synced {{time}}"
+    },
+    "metrics": {
+      "prepCompletion": "Prep Completion",
+      "followUpRate": "Follow-up Rate",
+      "responseAccuracy": "Response Accuracy",
+      "knowledgeCoverage": "Knowledge Coverage"
+    }
+  }
+}

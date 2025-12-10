@@ -1,0 +1,165 @@
+{
+  "greeting": "Guten Morgen, {{name}}. Hier ist deine Pipeline-Übersicht.",
+  "searchPlaceholder": "Deals, Unternehmen, Kontakte suchen...",
+  "quickActions": "Schnellaktionen",
+  "recentActivity": "Letzte Aktivität",
+  "viewAll": "Alle ansehen",
+  "analytics": {
+    "title": "Analyse",
+    "subtitle": "Detaillierte Einblicke und Berichte für dein Vertriebsteam.",
+    "metrics": "Metriken",
+    "pipelineHealth": "Pipeline-Zustand",
+    "conversionRates": "Conversion-Raten",
+    "teamPerformance": "Team-Leistung"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Verwalte deine Präferenzen und Kontoeinstellungen.",
+    "profile": "Profil-Einstellungen",
+    "notifications": "Benachrichtigungen",
+    "integrations": "Integrationen",
+    "integrationsDescription": "Verbinde deine Datenquellen und verwalte API-Zugangsdaten.",
+    "security": "Sicherheit",
+    "language": "Sprache",
+    "languageDescription": "Wähle deine bevorzugte Sprache für die Benutzeroberfläche.",
+    "appearance": "Darstellung",
+    "darkMode": "Dunkler Modus",
+    "apiStatus": "API-Status",
+    "search": "Suchen"
+  },
+  "integrations": {
+    "title": "Integrationen",
+    "subtitle": "Datenquellen verbinden und API-Zugangsdaten verwalten",
+    "available": "Verfügbar",
+    "connected": "Verbunden",
+    "notConnected": "Nicht verbunden",
+    "error": "Fehler",
+    "loading": "Integrationen werden geladen...",
+    "configure": "Konfigurieren",
+    "connect": "Verbinden",
+    "disconnect": "Trennen",
+    "test": "Test",
+    "testConnection": "Verbindung testen",
+    "saveCredentials": "Zugangsdaten speichern",
+    "enable": "Aktivieren",
+    "docs": "Dokumentation",
+    "apiUsage": "API-Nutzung",
+    "remaining": "{{remaining}} / {{total}} übrig",
+    "rateLimit": "{{limit}}/{{window}}s Rate-Limit",
+    "capabilities": {
+      "search": "Suchen",
+      "enrich": "Anreichern",
+      "people": "Personen",
+      "webhooks": "Webhooks"
+    },
+    "types": {
+      "company": "Unternehmensdatenquellen",
+      "people": "Personen- & E-Mail-Quellen",
+      "scraper": "Web Scraping & LinkedIn",
+      "file": "Datei-Import"
+    },
+    "fields": {
+      "api_key": "API-Schlüssel",
+      "api_token": "API-Token",
+      "apify_token": "Apify-Token",
+      "li_at_cookie": "LinkedIn-Cookie (li_at)"
+    },
+    "messages": {
+      "connectionSuccess": "Verbindung erfolgreich",
+      "connectionFailed": "Ungültige Zugangsdaten oder Verbindung fehlgeschlagen",
+      "testFailed": "Verbindungstest fehlgeschlagen",
+      "saveFailed": "Speichern fehlgeschlagen",
+      "noAuthRequired": "Keine Authentifizierung erforderlich",
+      "useDirectly": "Du kannst es direkt zum Importieren von Dateien verwenden."
+    }
+  },
+  "help": {
+    "title": "Hilfe & Support",
+    "subtitle": "Hilfe bekommen und das Support-Team kontaktieren.",
+    "documentation": "Dokumentation",
+    "contactSupport": "Support kontaktieren",
+    "faq": "Häufige Fragen"
+  },
+  "bowtie": {
+    "title": "Bowtie-Analyse",
+    "subtitle": "Vollständige Sicht auf Pipeline-Stufen und Conversion.",
+    "leftSide": "Akquise",
+    "rightSide": "Expansion",
+    "stages": {
+      "suspects": "Verdächtige",
+      "leads": "Leads",
+      "opportunities": "Opportunities",
+      "customers": "Kunden",
+      "advocates": "Fürsprecher"
+    },
+    "metrics": {
+      "conversionRate": "Conversion-Rate",
+      "avgDealSize": "Ø Dealgröße",
+      "avgCycleTime": "Ø Zykluszeit",
+      "winRate": "Win-Rate"
+    }
+  },
+  "health": {
+    "healthy": "Gesund",
+    "atRisk": "Gefährdet",
+    "critical": "Kritisch"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "noNew": "Keine neuen Benachrichtigungen"
+  },
+  "thoughtLeadership": {
+    "subtitle": "KI-gestützte Meeting-Vorbereitung, Einblicke und Wissensmanagement",
+    "upcomingMeetings": "Anstehende Meetings",
+    "meetingPrep": "Meeting-Vorbereitung",
+    "knowledgeBase": "Wissensbasis",
+    "autoResponses": "Automatische Antworten",
+    "contentLibrary": "Inhaltsbibliothek",
+    "meetings": {
+      "today": "Heute",
+      "tomorrow": "Morgen",
+      "thisWeek": "Diese Woche",
+      "prepReady": "Vorbereitung Fertig",
+      "prepPending": "Vorbereitung Ausstehend",
+      "viewBrief": "Briefing Ansehen",
+      "generateBrief": "Briefing Generieren",
+      "viewPresentation": "Präsentation Ansehen",
+      "viewMeetingPlan": "Meetingplan Ansehen"
+    },
+    "knowledge": {
+      "searchPlaceholder": "Transkripte, Einblicke und Inhalte durchsuchen...",
+      "transcriptsIndexed": "Transkripte Indexiert",
+      "insightsExtracted": "Einblicke Extrahiert",
+      "articlesGenerated": "Artikel Generiert",
+      "recentInsights": "Aktuelle Einblicke",
+      "topTopics": "Top-Themen",
+      "painPoint": "Schmerzpunkt",
+      "buyingSignal": "Kaufsignal",
+      "objection": "Einwand",
+      "competitorMention": "Wettbewerber-Erwähnung"
+    },
+    "responses": {
+      "pendingReview": "Zur Überprüfung",
+      "autoSent": "Automatisch Gesendet",
+      "drafts": "Entwürfe",
+      "confidenceScore": "Konfidenzwert",
+      "approve": "Genehmigen",
+      "edit": "Bearbeiten",
+      "escalate": "Eskalieren"
+    },
+    "calendar": {
+      "connectCalendar": "Kalender Verbinden",
+      "googleCalendar": "Google Kalender",
+      "outlookCalendar": "Outlook Kalender",
+      "syncNow": "Jetzt Synchronisieren",
+      "lastSync": "Zuletzt synchronisiert {{time}}"
+    },
+    "metrics": {
+      "prepCompletion": "Vorbereitung Abgeschlossen",
+      "followUpRate": "Follow-up Rate",
+      "responseAccuracy": "Antwort-Genauigkeit",
+      "knowledgeCoverage": "Wissensabdeckung"
+    }
+  }
+}

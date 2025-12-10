@@ -1,0 +1,66 @@
+{
+  "title": "Outreach Sequences",
+  "subtitle": "Create and manage automated outreach campaigns.",
+  "createSequence": "Create Sequence",
+  "sequences": {
+    "title": "Sequences",
+    "active": "Active",
+    "paused": "Paused",
+    "draft": "Draft",
+    "archived": "Archived"
+  },
+  "builder": {
+    "title": "Sequence Builder",
+    "name": "Sequence Name",
+    "description": "Description",
+    "addStep": "Add Step",
+    "save": "Save Sequence",
+    "publish": "Publish"
+  },
+  "steps": {
+    "title": "Steps",
+    "email": "Email",
+    "linkedin": "LinkedIn",
+    "phone": "Phone",
+    "task": "Task",
+    "wait": "Wait",
+    "delay": "Delay",
+    "delayDays": "{{count}} day",
+    "delayDays_other": "{{count}} days"
+  },
+  "channels": {
+    "email": "Email",
+    "linkedin": "LinkedIn",
+    "linkedinConnection": "LinkedIn Connection",
+    "linkedinMessage": "LinkedIn Message",
+    "phone": "Phone Call",
+    "phoneTask": "Phone Task",
+    "sms": "SMS"
+  },
+  "stats": {
+    "totalEnrolled": "Total Enrolled",
+    "active": "Active",
+    "completed": "Completed",
+    "replied": "Replied",
+    "bounced": "Bounced",
+    "unsubscribed": "Unsubscribed",
+    "openRate": "Open Rate",
+    "replyRate": "Reply Rate",
+    "clickRate": "Click Rate"
+  },
+  "templates": {
+    "subject": "Subject",
+    "body": "Body",
+    "preview": "Preview",
+    "tokens": "Available Tokens",
+    "personalize": "Personalize"
+  },
+  "actions": {
+    "enroll": "Enroll Contacts",
+    "pause": "Pause",
+    "resume": "Resume",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "edit": "Edit"
+  }
+}

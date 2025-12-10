@@ -1,0 +1,159 @@
+{
+  "dashboard": {
+    "title": "Intelligentie & Deep Work",
+    "subtitle": "Collaboratieve leeromgeving voor continue AI-verbetering",
+    "tabs": {
+      "session": "Week Work Sessie",
+      "knowledge": "Kennisbank",
+      "reasoning": "Redeneerlog",
+      "performance": "Prestaties"
+    },
+    "sessionStatus": {
+      "title": "Huidige Sessie",
+      "noActive": "Geen Actieve Sessie",
+      "startNew": "Start Week Work Sessie",
+      "phase": "Fase",
+      "decisionsReviewed": "{{reviewed}} van {{total}} beslissingen beoordeeld",
+      "patternsProposed": "{{count}} patronen voorgesteld",
+      "actionsCreated": "{{count}} acties aangemaakt"
+    }
+  },
+  "chat": {
+    "title": "AI Assistent",
+    "placeholder": "Vraag over beslissingen, verzoek analyse, of bespreek patronen...",
+    "send": "Verstuur",
+    "recording": "Opnemen...",
+    "startRecording": "Start spraakinvoer",
+    "stopRecording": "Stop opname",
+    "quickActions": {
+      "summarize": "Vat gemarkeerde beslissingen samen",
+      "suggestPatterns": "Stel nieuwe patronen voor",
+      "analyzeWeek": "Analyseer prestaties van deze week"
+    },
+    "errors": {
+      "sendFailed": "Verzenden bericht mislukt",
+      "transcribeFailed": "Transcriberen audio mislukt",
+      "microphoneAccess": "Microfoontoegang vereist voor spraakinvoer"
+    }
+  },
+  "session": {
+    "title": "Week Work Woensdag",
+    "subtitle": "Beoordeel AI-beslissingen en valideer geleerde lessen",
+    "noActive": "Geen actieve sessie",
+    "noActiveDescription": "Start een nieuwe Week Work sessie om gemarkeerde AI-beslissingen te beoordelen en de intelligentie van het systeem te verbeteren.",
+    "startSession": "Start Sessie",
+    "overview": {
+      "title": "Sessie Overzicht",
+      "totalDecisions": "Totaal Beslissingen",
+      "flaggedForReview": "Gemarkeerd voor Review",
+      "reviewed": "Beoordeeld",
+      "patternsProposed": "Voorgestelde Patronen"
+    },
+    "phases": {
+      "title": "Sessie Fases",
+      "review": "Review",
+      "pattern": "Patroon",
+      "outcome": "Uitkomst",
+      "planning": "Planning"
+    },
+    "flaggedDecisions": {
+      "title": "Gemarkeerde Beslissingen voor Review",
+      "confidence": "Vertrouwen",
+      "reasoning": "Redeneerketen",
+      "actions": {
+        "validate": "Valideren",
+        "correct": "Corrigeren",
+        "reject": "Afwijzen",
+        "discuss": "Bespreken"
+      }
+    },
+    "patterns": {
+      "title": "Voorgestelde Patronen",
+      "noPatterns": "Geen voorgestelde patronen om te beoordelen",
+      "activate": "Activeer Patroon",
+      "reject": "Afwijzen"
+    }
+  },
+  "knowledgeBase": {
+    "title": "Kennisbank",
+    "subtitle": "Blader door gevalideerde lessen en intelligentie",
+    "search": "Zoek kennisitems...",
+    "addEntry": "Item Toevoegen",
+    "filters": {
+      "all": "Alles",
+      "signalRules": "Signaalregels",
+      "companyIntel": "Bedrijfsinformatie",
+      "patterns": "Patronen",
+      "negative": "Negatieve Lessen"
+    },
+    "entry": {
+      "type": "Type",
+      "accuracy": "Nauwkeurigheid",
+      "retrievals": "Opvragingen",
+      "created": "Aangemaakt",
+      "source": "Bron",
+      "edit": "Bewerken",
+      "viewDetails": "Bekijk Details",
+      "archive": "Archiveren"
+    },
+    "modal": {
+      "title": "Item Details",
+      "content": "Inhoud",
+      "statistics": "Statistieken",
+      "metadata": "Metadata",
+      "close": "Sluiten",
+      "edit": "Bewerk Item"
+    },
+    "empty": {
+      "title": "Geen kennisitems gevonden",
+      "description": "Kennisitems verschijnen hier naarmate de AI leert van gevalideerde beslissingen."
+    }
+  },
+  "reasoningLog": {
+    "title": "AI Redeneerlog",
+    "subtitle": "Volledige transparantie in elke AI-beslissing",
+    "today": "Vandaag",
+    "yesterday": "Gisteren",
+    "totalDecisions": "Totaal Beslissingen",
+    "validated": "Gevalideerd",
+    "corrected": "Gecorrigeerd",
+    "accuracy": "Nauwkeurigheid",
+    "noDecisions": "Geen beslissingen gevonden",
+    "noDecisionsDescription": "AI-beslissingen verschijnen hier terwijl het systeem signalen verwerkt en aanbevelingen doet.",
+    "needsReview": "Review Nodig",
+    "reasoning": "Redeneerketen",
+    "reviewNotes": "Review Notities",
+    "viewFull": "Bekijk Alle Details",
+    "reviewNow": "Nu Beoordelen"
+  },
+  "performance": {
+    "title": "Prestatie Dashboard",
+    "subtitle": "Volg AI-verbetering over tijd",
+    "last7Days": "7 Dagen",
+    "last30Days": "30 Dagen",
+    "last90Days": "90 Dagen",
+    "vsLastPeriod": "vs vorige periode",
+    "thisMonth": "deze maand",
+    "classificationAccuracy": "Classificatie Nauwkeurigheid",
+    "confidenceCalibration": "Vertrouwen Kalibratie",
+    "dealPrediction": "Deal Voorspelling",
+    "knowledgeEntries": "Kennisitems",
+    "accuracyTrends": "Nauwkeurigheidstrends Over Tijd",
+    "learningVelocity": "Leersnelheid",
+    "decisionsMade": "Beslissingen Genomen",
+    "flaggedForReview": "Gemarkeerd voor Review",
+    "correctionsApplied": "Correcties Toegepast",
+    "newKnowledgeEntries": "Nieuwe Kennisitems",
+    "patternRulesActivated": "Patroonregels Geactiveerd",
+    "businessImpact": "Bedrijfsimpact",
+    "signalToConversion": "Signaal → Conversie",
+    "timeToContact": "Tijd tot Contact",
+    "missedSignals": "Gemiste Signalen",
+    "researchTime": "Onderzoekstijd/Week",
+    "days": "dagen",
+    "hrs": "uur",
+    "mo": "mnd",
+    "hrsWeek": "uur/week",
+    "decisionsByType": "Beslissingen per Type"
+  }
+}

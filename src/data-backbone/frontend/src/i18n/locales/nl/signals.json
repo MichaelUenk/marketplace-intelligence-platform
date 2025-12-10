@@ -1,0 +1,55 @@
+{
+  "title": "Signalen Intelligentie",
+  "subtitle": "Volg koopsignalen en intentiedata over je accounts.",
+  "intentTitle": "Intentie Data",
+  "intentSubtitle": "Monitor koper intentiesignalen en betrokkenheidspatronen.",
+  "overview": {
+    "title": "Signaal Overzicht",
+    "past30Days": "Afgelopen 30 dagen",
+    "signalTrend": "Signaal Trend (30 dagen)",
+    "week1": "Week 1",
+    "week2": "Week 2",
+    "week3": "Week 3",
+    "week4": "Week 4",
+    "viewDetailedAnalytics": "Gedetailleerde Analyse Bekijken"
+  },
+  "configure": "Configureren",
+  "categories": {
+    "title": "Signaal Categorieën",
+    "directEngagement": "Directe Betrokkenheid",
+    "sustainability": "Duurzaamheid",
+    "growthExpansion": "Groei & Uitbreiding",
+    "workplaceExperience": "Werkplekervaring",
+    "employeeWellbeing": "Werknemerswelzijn"
+  },
+  "hotAccounts": {
+    "title": "Hot Accounts",
+    "description": "Accounts met hoge intentie scores"
+  },
+  "recentSignals": {
+    "title": "Recente Signalen",
+    "company": "Bedrijf",
+    "signal": "Signaal",
+    "type": "Type",
+    "strength": "Sterkte",
+    "date": "Datum"
+  },
+  "strength": {
+    "high": "Hoog",
+    "medium": "Gemiddeld",
+    "low": "Laag"
+  },
+  "types": {
+    "news": "Nieuws",
+    "hiring": "Werving",
+    "funding": "Financiering",
+    "expansion": "Uitbreiding",
+    "technology": "Technologie",
+    "partnership": "Partnerschap"
+  },
+  "notifications": {
+    "hotStatus": "{{company}} heeft Hot status bereikt",
+    "newSignal": "Nieuw signaal: {{description}}",
+    "dealMoved": "Deal verplaatst naar {{stage}}: {{company}}"
+  }
+}

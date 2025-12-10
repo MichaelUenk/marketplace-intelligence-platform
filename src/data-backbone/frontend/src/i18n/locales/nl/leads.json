@@ -1,0 +1,49 @@
+{
+  "title": "Leads",
+  "subtitle": "{{count}} nieuwe leads die aandacht vereisen.",
+  "addLead": "Lead toevoegen",
+  "management": {
+    "title": "Lead Management",
+    "description": "Reageer binnen 4 uur op leads voor optimale conversie"
+  },
+  "stats": {
+    "totalLeads": "Totaal Leads",
+    "awaitingContact": "Wachten op Contact",
+    "overdue": "Te Laat"
+  },
+  "filters": {
+    "noMatchingLeads": "Geen leads komen overeen met je huidige filters.",
+    "responseTimeUrgency": "Responstijd Urgentie"
+  },
+  "urgency": {
+    "fourToTwo": "4u – 2u resterend",
+    "twoToOne": "2u – 1u resterend",
+    "underOne": "Minder dan 1u resterend",
+    "overdue": "Te laat"
+  },
+  "actions": {
+    "actNow": "Nu actie!",
+    "contactNow": "Nu contacteren",
+    "followUp": "Opvolgen",
+    "convert": "Converteren",
+    "view": "Bekijken",
+    "archive": "Archiveren",
+    "assign": "Toewijzen",
+    "addNote": "Notitie toevoegen"
+  },
+  "status": {
+    "new": "Nieuw",
+    "contacted": "Gecontacteerd",
+    "qualified": "Gekwalificeerd",
+    "converted": "Geconverteerd",
+    "lost": "Verloren"
+  },
+  "source": {
+    "website": "Website",
+    "referral": "Doorverwijzing",
+    "linkedin": "LinkedIn",
+    "coldOutreach": "Koude acquisitie",
+    "event": "Evenement",
+    "other": "Anders"
+  }
+}

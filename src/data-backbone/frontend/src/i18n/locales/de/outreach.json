@@ -1,0 +1,66 @@
+{
+  "title": "Outreach-Sequenzen",
+  "subtitle": "Erstelle und verwalte automatisierte Outreach-Kampagnen.",
+  "createSequence": "Sequenz erstellen",
+  "sequences": {
+    "title": "Sequenzen",
+    "active": "Aktiv",
+    "paused": "Pausiert",
+    "draft": "Entwurf",
+    "archived": "Archiviert"
+  },
+  "builder": {
+    "title": "Sequenz-Builder",
+    "name": "Sequenzname",
+    "description": "Beschreibung",
+    "addStep": "Schritt hinzufügen",
+    "save": "Sequenz speichern",
+    "publish": "Veröffentlichen"
+  },
+  "steps": {
+    "title": "Schritte",
+    "email": "E-Mail",
+    "linkedin": "LinkedIn",
+    "phone": "Telefon",
+    "task": "Aufgabe",
+    "wait": "Warten",
+    "delay": "Verzögerung",
+    "delayDays": "{{count}} Tag",
+    "delayDays_other": "{{count}} Tage"
+  },
+  "channels": {
+    "email": "E-Mail",
+    "linkedin": "LinkedIn",
+    "linkedinConnection": "LinkedIn-Verbindung",
+    "linkedinMessage": "LinkedIn-Nachricht",
+    "phone": "Telefonanruf",
+    "phoneTask": "Telefonaufgabe",
+    "sms": "SMS"
+  },
+  "stats": {
+    "totalEnrolled": "Gesamt eingeschrieben",
+    "active": "Aktiv",
+    "completed": "Abgeschlossen",
+    "replied": "Geantwortet",
+    "bounced": "Zurückgewiesen",
+    "unsubscribed": "Abgemeldet",
+    "openRate": "Öffnungsrate",
+    "replyRate": "Antwortrate",
+    "clickRate": "Klickrate"
+  },
+  "templates": {
+    "subject": "Betreff",
+    "body": "Inhalt",
+    "preview": "Vorschau",
+    "tokens": "Verfügbare Tokens",
+    "personalize": "Personalisieren"
+  },
+  "actions": {
+    "enroll": "Kontakte einschreiben",
+    "pause": "Pausieren",
+    "resume": "Fortsetzen",
+    "duplicate": "Duplizieren",
+    "delete": "Löschen",
+    "edit": "Bearbeiten"
+  }
+}

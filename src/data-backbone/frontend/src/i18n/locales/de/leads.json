@@ -1,0 +1,49 @@
+{
+  "title": "Leads",
+  "subtitle": "{{count}} neue Leads erfordern Aufmerksamkeit.",
+  "addLead": "Lead hinzufügen",
+  "management": {
+    "title": "Lead Management",
+    "description": "Reagiere innerhalb von 4 Stunden auf Leads für optimale Conversion"
+  },
+  "stats": {
+    "totalLeads": "Leads gesamt",
+    "awaitingContact": "Warten auf Kontakt",
+    "overdue": "Überfällig"
+  },
+  "filters": {
+    "noMatchingLeads": "Keine Leads entsprechen deinen aktuellen Filtern.",
+    "responseTimeUrgency": "Antwortzeit-Dringlichkeit"
+  },
+  "urgency": {
+    "fourToTwo": "4h – 2h verbleibend",
+    "twoToOne": "2h – 1h verbleibend",
+    "underOne": "Weniger als 1h verbleibend",
+    "overdue": "Überfällig"
+  },
+  "actions": {
+    "actNow": "Jetzt handeln!",
+    "contactNow": "Jetzt kontaktieren",
+    "followUp": "Nachfassen",
+    "convert": "Konvertieren",
+    "view": "Ansehen",
+    "archive": "Archivieren",
+    "assign": "Zuweisen",
+    "addNote": "Notiz hinzufügen"
+  },
+  "status": {
+    "new": "Neu",
+    "contacted": "Kontaktiert",
+    "qualified": "Qualifiziert",
+    "converted": "Konvertiert",
+    "lost": "Verloren"
+  },
+  "source": {
+    "website": "Webseite",
+    "referral": "Empfehlung",
+    "linkedin": "LinkedIn",
+    "coldOutreach": "Kaltakquise",
+    "event": "Veranstaltung",
+    "other": "Sonstiges"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "title": "Outreach Sequenties",
+  "subtitle": "Maak en beheer geautomatiseerde outreach campagnes.",
+  "createSequence": "Sequentie maken",
+  "sequences": {
+    "title": "Sequenties",
+    "active": "Actief",
+    "paused": "Gepauzeerd",
+    "draft": "Concept",
+    "archived": "Gearchiveerd"
+  },
+  "builder": {
+    "title": "Sequentie Builder",
+    "name": "Sequentie Naam",
+    "description": "Beschrijving",
+    "addStep": "Stap toevoegen",
+    "save": "Sequentie opslaan",
+    "publish": "Publiceren"
+  },
+  "steps": {
+    "title": "Stappen",
+    "email": "E-mail",
+    "linkedin": "LinkedIn",
+    "phone": "Telefoon",
+    "task": "Taak",
+    "wait": "Wachten",
+    "delay": "Vertraging",
+    "delayDays": "{{count}} dag",
+    "delayDays_other": "{{count}} dagen"
+  },
+  "channels": {
+    "email": "E-mail",
+    "linkedin": "LinkedIn",
+    "linkedinConnection": "LinkedIn Connectie",
+    "linkedinMessage": "LinkedIn Bericht",
+    "phone": "Telefoongesprek",
+    "phoneTask": "Telefoon Taak",
+    "sms": "SMS"
+  },
+  "stats": {
+    "totalEnrolled": "Totaal Ingeschreven",
+    "active": "Actief",
+    "completed": "Voltooid",
+    "replied": "Beantwoord",
+    "bounced": "Teruggestuurd",
+    "unsubscribed": "Uitgeschreven",
+    "openRate": "Open Rate",
+    "replyRate": "Antwoord Rate",
+    "clickRate": "Klik Rate"
+  },
+  "templates": {
+    "subject": "Onderwerp",
+    "body": "Inhoud",
+    "preview": "Voorbeeld",
+    "tokens": "Beschikbare Tokens",
+    "personalize": "Personaliseren"
+  },
+  "actions": {
+    "enroll": "Contacten inschrijven",
+    "pause": "Pauzeren",
+    "resume": "Hervatten",
+    "duplicate": "Dupliceren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken"
+  }
+}

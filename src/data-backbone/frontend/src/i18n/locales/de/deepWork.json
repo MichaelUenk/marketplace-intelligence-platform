@@ -1,0 +1,159 @@
+{
+  "dashboard": {
+    "title": "Intelligenz & Deep Work",
+    "subtitle": "Kollaborative Lernumgebung für kontinuierliche KI-Verbesserung",
+    "tabs": {
+      "session": "Week Work Sitzung",
+      "knowledge": "Wissensdatenbank",
+      "reasoning": "Reasoning-Log",
+      "performance": "Leistung"
+    },
+    "sessionStatus": {
+      "title": "Aktuelle Sitzung",
+      "noActive": "Keine Aktive Sitzung",
+      "startNew": "Week Work Sitzung Starten",
+      "phase": "Phase",
+      "decisionsReviewed": "{{reviewed}} von {{total}} Entscheidungen überprüft",
+      "patternsProposed": "{{count}} Muster vorgeschlagen",
+      "actionsCreated": "{{count}} Aktionen erstellt"
+    }
+  },
+  "chat": {
+    "title": "KI-Assistent",
+    "placeholder": "Fragen Sie nach Entscheidungen, fordern Sie Analysen an oder diskutieren Sie Muster...",
+    "send": "Senden",
+    "recording": "Aufnahme...",
+    "startRecording": "Spracheingabe starten",
+    "stopRecording": "Aufnahme stoppen",
+    "quickActions": {
+      "summarize": "Markierte Entscheidungen zusammenfassen",
+      "suggestPatterns": "Neue Muster vorschlagen",
+      "analyzeWeek": "Wochenleistung analysieren"
+    },
+    "errors": {
+      "sendFailed": "Nachricht konnte nicht gesendet werden",
+      "transcribeFailed": "Audio konnte nicht transkribiert werden",
+      "microphoneAccess": "Mikrofonzugriff für Spracheingabe erforderlich"
+    }
+  },
+  "session": {
+    "title": "Week Work Mittwoch",
+    "subtitle": "KI-Entscheidungen überprüfen und Erkenntnisse validieren",
+    "noActive": "Keine aktive Sitzung",
+    "noActiveDescription": "Starten Sie eine neue Week Work Sitzung, um markierte KI-Entscheidungen zu überprüfen und die Intelligenz des Systems zu verbessern.",
+    "startSession": "Sitzung Starten",
+    "overview": {
+      "title": "Sitzungsübersicht",
+      "totalDecisions": "Gesamte Entscheidungen",
+      "flaggedForReview": "Zur Überprüfung Markiert",
+      "reviewed": "Überprüft",
+      "patternsProposed": "Vorgeschlagene Muster"
+    },
+    "phases": {
+      "title": "Sitzungsphasen",
+      "review": "Überprüfung",
+      "pattern": "Muster",
+      "outcome": "Ergebnis",
+      "planning": "Planung"
+    },
+    "flaggedDecisions": {
+      "title": "Markierte Entscheidungen zur Überprüfung",
+      "confidence": "Konfidenz",
+      "reasoning": "Reasoning-Kette",
+      "actions": {
+        "validate": "Validieren",
+        "correct": "Korrigieren",
+        "reject": "Ablehnen",
+        "discuss": "Diskutieren"
+      }
+    },
+    "patterns": {
+      "title": "Vorgeschlagene Muster",
+      "noPatterns": "Keine vorgeschlagenen Muster zur Überprüfung",
+      "activate": "Muster Aktivieren",
+      "reject": "Ablehnen"
+    }
+  },
+  "knowledgeBase": {
+    "title": "Wissensdatenbank",
+    "subtitle": "Durchsuchen Sie validierte Erkenntnisse und Intelligenz",
+    "search": "Wissenseinträge durchsuchen...",
+    "addEntry": "Eintrag Hinzufügen",
+    "filters": {
+      "all": "Alle",
+      "signalRules": "Signalregeln",
+      "companyIntel": "Unternehmensinformationen",
+      "patterns": "Muster",
+      "negative": "Negative Erkenntnisse"
+    },
+    "entry": {
+      "type": "Typ",
+      "accuracy": "Genauigkeit",
+      "retrievals": "Abrufe",
+      "created": "Erstellt",
+      "source": "Quelle",
+      "edit": "Bearbeiten",
+      "viewDetails": "Details Anzeigen",
+      "archive": "Archivieren"
+    },
+    "modal": {
+      "title": "Eintragsdetails",
+      "content": "Inhalt",
+      "statistics": "Statistiken",
+      "metadata": "Metadaten",
+      "close": "Schließen",
+      "edit": "Eintrag Bearbeiten"
+    },
+    "empty": {
+      "title": "Keine Wissenseinträge gefunden",
+      "description": "Wissenseinträge erscheinen hier, wenn die KI aus validierten Entscheidungen lernt."
+    }
+  },
+  "reasoningLog": {
+    "title": "KI-Reasoning-Log",
+    "subtitle": "Vollständige Transparenz bei jeder KI-Entscheidung",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "totalDecisions": "Gesamte Entscheidungen",
+    "validated": "Validiert",
+    "corrected": "Korrigiert",
+    "accuracy": "Genauigkeit",
+    "noDecisions": "Keine Entscheidungen gefunden",
+    "noDecisionsDescription": "KI-Entscheidungen erscheinen hier, wenn das System Signale verarbeitet und Empfehlungen gibt.",
+    "needsReview": "Überprüfung Erforderlich",
+    "reasoning": "Reasoning-Kette",
+    "reviewNotes": "Überprüfungsnotizen",
+    "viewFull": "Alle Details Anzeigen",
+    "reviewNow": "Jetzt Überprüfen"
+  },
+  "performance": {
+    "title": "Leistungs-Dashboard",
+    "subtitle": "KI-Verbesserung über Zeit verfolgen",
+    "last7Days": "7 Tage",
+    "last30Days": "30 Tage",
+    "last90Days": "90 Tage",
+    "vsLastPeriod": "vs. letzter Zeitraum",
+    "thisMonth": "diesen Monat",
+    "classificationAccuracy": "Klassifizierungsgenauigkeit",
+    "confidenceCalibration": "Konfidenz-Kalibrierung",
+    "dealPrediction": "Deal-Vorhersage",
+    "knowledgeEntries": "Wissenseinträge",
+    "accuracyTrends": "Genauigkeitstrends über Zeit",
+    "learningVelocity": "Lerngeschwindigkeit",
+    "decisionsMade": "Getroffene Entscheidungen",
+    "flaggedForReview": "Zur Überprüfung Markiert",
+    "correctionsApplied": "Korrekturen Angewendet",
+    "newKnowledgeEntries": "Neue Wissenseinträge",
+    "patternRulesActivated": "Musterregeln Aktiviert",
+    "businessImpact": "Geschäftsauswirkung",
+    "signalToConversion": "Signal → Konversion",
+    "timeToContact": "Zeit bis Kontakt",
+    "missedSignals": "Verpasste Signale",
+    "researchTime": "Recherchezeit/Woche",
+    "days": "Tage",
+    "hrs": "Std",
+    "mo": "Mt",
+    "hrsWeek": "Std/Woche",
+    "decisionsByType": "Entscheidungen nach Typ"
+  }
+}
